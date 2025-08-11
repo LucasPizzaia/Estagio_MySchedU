@@ -3,7 +3,7 @@ import { useState } from 'react';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 
-export default function AuthenticatedLayout({ header, children }) {
+export default function AuthenticatedLayout({ header, children, bgClass = 'bg-gray-100' }) {
   const { auth } = usePage().props;
   const current = usePage().url || '/';
   const [open, setOpen] = useState(false);
@@ -11,17 +11,14 @@ export default function AuthenticatedLayout({ header, children }) {
   const isActive = (path) => current === path || current.startsWith(path + '/');
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className={`min-h-screen ${bgClass}`}>
       <nav className="bg-white border-b">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Brand + Desktop Menu */}
             <div className="flex items-center gap-8">
-              <Link href="/dashboard" className="text-xl font-bold text-amber-600">
-                MySchedU
-              </Link>
+              <Link href="/dashboard" className="text-xl font-bold text-amber-600">MySchedU</Link>
 
-              {/* Desktop TOP NAV */}
               <div className="hidden sm:-my-px sm:ms-10 sm:flex sm:items-center sm:gap-6">
                 <NavLink href="/dashboard"   active={isActive('/dashboard')}>DASHBOARD</NavLink>
                 <NavLink href="/professores" active={isActive('/professores')}>PROFESSORES</NavLink>
@@ -31,9 +28,8 @@ export default function AuthenticatedLayout({ header, children }) {
             {/* Usuário + Toggler */}
             <div className="flex items-center gap-4">
               <span className="hidden sm:inline text-sm text-gray-600">{auth.user?.name}</span>
-              <Link href="/logout" method="post" as="button" className="hidden sm:inline text-sm text-gray-600 hover:text-red-600">
-                Sair
-              </Link>
+              <Link href="/logout" method="post" as="button" className="hidden sm:inline text-sm text-gray-600 hover:text-red-600">Sair</Link>
+
               <button
                 onClick={() => setOpen(!open)}
                 className="sm:hidden inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-600"
