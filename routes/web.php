@@ -2,12 +2,12 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfessorController;
+use App\Http\Controllers\TurmaController; 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    // visitantes veem Welcome; logado vai pro dashboard (que pode redirecionar pra Professores)
     if (auth()->check()) return redirect()->route('dashboard');
 
     return Inertia::render('Welcome', [
@@ -18,16 +18,22 @@ Route::get('/', function () {
     ]);
 });
 
-// se preferir cair direto em Professores ao logar, troque o retorno por redirect()->route('professores.index')
 Route::get('/dashboard', fn () => Inertia::render('Dashboard'))
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Professores
     Route::resource('professores', ProfessorController::class)->parameters([
         'professores' => 'professor'
     ]);
 
+    // Turmas  <-- NOVO
+    Route::resource('turmas', TurmaController::class)->parameters([
+        'turmas' => 'turma'
+    ]);
+
+    // Perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

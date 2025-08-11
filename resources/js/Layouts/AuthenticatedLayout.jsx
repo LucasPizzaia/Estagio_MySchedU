@@ -22,13 +22,17 @@ export default function AuthenticatedLayout({ header, children, bgClass = 'bg-gr
               <div className="hidden sm:-my-px sm:ms-10 sm:flex sm:items-center sm:gap-6">
                 <NavLink href="/dashboard"   active={isActive('/dashboard')}>DASHBOARD</NavLink>
                 <NavLink href="/professores" active={isActive('/professores')}>PROFESSORES</NavLink>
+                {/* NOVO: Turmas */}
+                <NavLink href="/turmas"      active={isActive('/turmas')}>TURMAS</NavLink>
               </div>
             </div>
 
             {/* Usuário + Toggler */}
             <div className="flex items-center gap-4">
               <span className="hidden sm:inline text-sm text-gray-600">{auth.user?.name}</span>
-              <Link href="/logout" method="post" as="button" className="hidden sm:inline text-sm text-gray-600 hover:text-red-600">Sair</Link>
+              <Link href="/logout" method="post" as="button" className="hidden sm:inline text-sm text-gray-600 hover:text-red-600">
+                Sair
+              </Link>
 
               <button
                 onClick={() => setOpen(!open)}
@@ -50,6 +54,8 @@ export default function AuthenticatedLayout({ header, children, bgClass = 'bg-gr
           <div className="pt-2 pb-3 space-y-1">
             <ResponsiveNavLink href="/dashboard"   active={isActive('/dashboard')}>Dashboard</ResponsiveNavLink>
             <ResponsiveNavLink href="/professores" active={isActive('/professores')}>Professores</ResponsiveNavLink>
+            {/* NOVO: Turmas */}
+            <ResponsiveNavLink href="/turmas"      active={isActive('/turmas')}>Turmas</ResponsiveNavLink>
           </div>
 
           <div className="border-t border-gray-200 pt-4 pb-1">
