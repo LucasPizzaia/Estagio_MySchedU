@@ -4,14 +4,14 @@ import { useState } from 'react';
 
 export default function Create() {
   const { data, setData, post, processing, errors, reset } = useForm({
-    sala: '',
-    lugares: '',
-    campus: 'IPOLON',
+    nome: '',
+    data_entrada: '',
+    quantidade_alunos: '',
   });
 
   const submit = (e) => {
     e.preventDefault();
-    post('/turmas', { onSuccess: () => reset('sala','lugares','campus') });
+    post('/turmas', { onSuccess: () => reset('nome', 'data_entrada', 'quantidade_alunos') });
   };
 
   return (
@@ -28,56 +28,38 @@ export default function Create() {
       <form onSubmit={submit} className="max-w-3xl">
         <div className="rounded-2xl bg-white p-6 shadow-xl space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Sala (nome/número)</label>
+            <label className="block text-sm font-medium text-gray-700">Nome da Turma</label>
             <input
               className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500"
-              value={data.sala}
-              onChange={(e) => setData('sala', e.target.value)}
-              placeholder="Ex.: B-201"
+              value={data.nome}
+              onChange={(e) => setData('nome', e.target.value)}
+              placeholder="Ex.: Turma A"
             />
-            {errors.sala && <p className="mt-1 text-sm text-red-600">{errors.sala}</p>}
+            {errors.nome && <p className="mt-1 text-sm text-red-600">{errors.nome}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Lugares</label>
+            <label className="block text-sm font-medium text-gray-700">Data de Entrada</label>
+            <input
+              type="date"
+              className="mt-1 w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500"
+              value={data.data_entrada}
+              onChange={(e) => setData('data_entrada', e.target.value)}
+            />
+            {errors.data_entrada && <p className="mt-1 text-sm text-red-600">{errors.data_entrada}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Quantidade de Alunos</label>
             <input
               type="number"
-              min="1"
+              min="0"
               className="mt-1 w-40 rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500"
-              value={data.lugares}
-              onChange={(e) => setData('lugares', e.target.value)}
+              value={data.quantidade_alunos}
+              onChange={(e) => setData('quantidade_alunos', e.target.value)}
               placeholder="Ex.: 40"
             />
-            {errors.lugares && <p className="mt-1 text-sm text-red-600">{errors.lugares}</p>}
-          </div>
-
-          <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">Campus</span>
-            <div className="flex gap-3">
-              <label className="inline-flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="campus"
-                  value="IPOLON"
-                  checked={data.campus === 'IPOLON'}
-                  onChange={(e) => setData('campus', e.target.value)}
-                  className="h-4 w-4 text-amber-600 focus:ring-amber-500"
-                />
-                Campus Ipolon
-              </label>
-              <label className="inline-flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="campus"
-                  value="SEDE"
-                  checked={data.campus === 'SEDE'}
-                  onChange={(e) => setData('campus', e.target.value)}
-                  className="h-4 w-4 text-amber-600 focus:ring-amber-500"
-                />
-                Campus Sede
-              </label>
-            </div>
-            {errors.campus && <p className="mt-1 text-sm text-red-600">{errors.campus}</p>}
+            {errors.quantidade_alunos && <p className="mt-1 text-sm text-red-600">{errors.quantidade_alunos}</p>}
           </div>
 
           <div className="flex gap-2">

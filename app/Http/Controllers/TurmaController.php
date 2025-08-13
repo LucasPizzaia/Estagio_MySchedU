@@ -10,7 +10,8 @@ class TurmaController extends Controller
 {
     public function index()
     {
-        $turmas = Turma::orderBy('sala')->get();
+        // Alterado para ordenar pela 'nome' da turma, mas pode continuar com 'data_entrada' ou outro critério
+        $turmas = Turma::orderBy('nome')->get();  
         return Inertia::render('Turmas/Index', [
             'turmas' => $turmas,
             'flash'  => session('success'),
@@ -24,13 +25,16 @@ class TurmaController extends Controller
 
     public function store(Request $request)
     {
+        // Validação dos campos novos
         $data = $request->validate([
-            'sala'    => 'required|string|max:100',
-            'lugares' => 'required|integer|min:1|max:65535',
-            'campus'  => 'required|in:IPOLON,SEDE',
+            'nome'           => 'required|string|max:255',
+            'data_entrada'   => 'required|date',
+            'quantidade_alunos' => 'required|integer|min:0',
         ]);
 
+        // Criação da turma com os novos campos
         Turma::create($data);
+
         return redirect()->route('turmas.index')->with('success', 'Turma criada com sucesso.');
     }
 
@@ -41,19 +45,24 @@ class TurmaController extends Controller
 
     public function update(Request $request, Turma $turma)
     {
+        // Validação dos campos novos
         $data = $request->validate([
-            'sala'    => 'required|string|max:100',
-            'lugares' => 'required|integer|min:1|max:65535',
-            'campus'  => 'required|in:IPOLON,SEDE',
+            'nome'           => 'required|string|max:255',
+            'data_entrada'   => 'required|date',
+            'quantidade_alunos' => 'required|integer|min:0',
         ]);
 
+        // Atualização dos dados da turma
         $turma->update($data);
+
         return redirect()->route('turmas.index')->with('success', 'Turma atualizada com sucesso.');
     }
 
     public function destroy(Turma $turma)
     {
+        // Exclusão da turma
         $turma->delete();
+
         return redirect()->route('turmas.index')->with('success', 'Turma excluída.');
     }
 }

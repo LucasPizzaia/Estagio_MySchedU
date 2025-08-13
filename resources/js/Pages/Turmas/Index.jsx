@@ -11,8 +11,8 @@ export default function Index({ turmas = [], flash }) {
     if (q) {
       const s = q.toLowerCase();
       data = data.filter(t =>
-        (t.sala || '').toLowerCase().includes(s) ||
-        String(t.lugares).includes(s)
+        (t.nome || '').toLowerCase().includes(s) ||  // Pesquisa pelo nome da turma
+        String(t.quantidade_alunos).includes(s)    // Pesquisa pela quantidade de alunos
       );
     }
     if (campus !== 'ALL') data = data.filter(t => t.campus === campus);
@@ -32,14 +32,14 @@ export default function Index({ turmas = [], flash }) {
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-3xl font-extrabold leading-tight">Turmas</h1>
-            <p className="text-white/90 mt-1">Gerencie salas, lugares e campus</p>
+            <p className="text-white/90 mt-1">Gerencie turmas, horários e quantidade de alunos</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="flex rounded-lg overflow-hidden bg-white">
               <span className="hidden sm:inline-flex items-center px-3 text-sm text-gray-500">Buscar</span>
               <input
                 className="w-full px-3 py-2 text-gray-800 outline-none"
-                placeholder="Sala ou lugares..."
+                placeholder="Nome ou quantidade de alunos..."
                 value={q}
                 onChange={e=>setQ(e.target.value)}
               />
@@ -76,8 +76,8 @@ export default function Index({ turmas = [], flash }) {
         <table className="w-full text-left">
           <thead className="bg-amber-50">
             <tr className="text-gray-700">
-              <th className="px-4 py-3">Sala</th>
-              <th className="px-4 py-3 w-40">Lugares</th>
+              <th className="px-4 py-3">Nome da Turma</th>
+              <th className="px-4 py-3 w-40">Quantidade de Alunos</th>
               <th className="px-4 py-3 w-48">Campus</th>
               <th className="px-4 py-3 text-right w-48">Ações</th>
             </tr>
@@ -85,8 +85,8 @@ export default function Index({ turmas = [], flash }) {
           <tbody>
             {list.map((t, i) => (
               <tr key={t.id} className={i % 2 ? 'bg-amber-50/40' : 'bg-white'}>
-                <td className="px-4 py-3 font-medium text-gray-900">{t.sala}</td>
-                <td className="px-4 py-3">{t.lugares}</td>
+                <td className="px-4 py-3 font-medium text-gray-900">{t.nome}</td>  {/* Exibindo o nome da turma */}
+                <td className="px-4 py-3">{t.quantidade_alunos}</td> {/* Exibindo a quantidade de alunos */}
                 <td className="px-4 py-3">
                   <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${
                     t.campus === 'IPOLON' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
