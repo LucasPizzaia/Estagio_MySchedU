@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 
 export default function Index({ turmas = [], flash }) {
   const [q, setQ] = useState('');
-  const [campus, setCampus] = useState('ALL');
 
   const list = useMemo(() => {
     let data = [...turmas];
@@ -12,12 +11,12 @@ export default function Index({ turmas = [], flash }) {
       const s = q.toLowerCase();
       data = data.filter(t =>
         (t.nome || '').toLowerCase().includes(s) ||  // Pesquisa pelo nome da turma
-        String(t.quantidade_alunos).includes(s)    // Pesquisa pela quantidade de alunos
+        String(t.quantidade_alunos).includes(s) ||  // Pesquisa pela quantidade de alunos
+        (t.data_entrada || '').toLowerCase().includes(s) // Pesquisa pela data de entrada
       );
     }
-    if (campus !== 'ALL') data = data.filter(t => t.campus === campus);
     return data;
-  }, [turmas, q, campus]);
+  }, [turmas, q]);
 
   const del = (id) => {
     if (confirm('Excluir turma?')) router.delete(`/turmas/${id}`);
@@ -32,7 +31,7 @@ export default function Index({ turmas = [], flash }) {
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-3xl font-extrabold leading-tight">Turmas</h1>
-            <p className="text-white/90 mt-1">Gerencie turmas, horários e quantidade de alunos</p>
+            <p className="text-white/90 mt-1">Gerencie turmas e quantidade de alunos</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="flex rounded-lg overflow-hidden bg-white">
@@ -41,24 +40,15 @@ export default function Index({ turmas = [], flash }) {
                 className="w-full px-3 py-2 text-gray-800 outline-none"
                 placeholder="Nome ou quantidade de alunos..."
                 value={q}
-                onChange={e=>setQ(e.target.value)}
+                onChange={e => setQ(e.target.value)}
               />
             </div>
-            <select
-              className="rounded-lg bg-white text-gray-800 px-3 py-2"
-              value={campus}
-              onChange={e=>setCampus(e.target.value)}
-            >
-              <option value="ALL">Todos os Campus</option>
-              <option value="IPOLON">Campus Ipolon</option>
-              <option value="SEDE">Campus Sede</option>
-            </select>
 
             <Link
               href="/turmas/create"
               className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 font-semibold text-amber-700 shadow-sm hover:shadow transition"
             >
-              <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M13 11h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 2 0v6z"/></svg>
+              <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M13 11h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 2 0v6z" /></svg>
               Nova Turma
             </Link>
           </div>
@@ -78,7 +68,7 @@ export default function Index({ turmas = [], flash }) {
             <tr className="text-gray-700">
               <th className="px-4 py-3">Nome da Turma</th>
               <th className="px-4 py-3 w-40">Quantidade de Alunos</th>
-              <th className="px-4 py-3 w-48">Campus</th>
+              <th className="px-4 py-3 w-48">Data de Entrada</th> {/* Adicionando a Data de Entrada */}
               <th className="px-4 py-3 text-right w-48">Ações</th>
             </tr>
           </thead>
@@ -87,26 +77,20 @@ export default function Index({ turmas = [], flash }) {
               <tr key={t.id} className={i % 2 ? 'bg-amber-50/40' : 'bg-white'}>
                 <td className="px-4 py-3 font-medium text-gray-900">{t.nome}</td>  {/* Exibindo o nome da turma */}
                 <td className="px-4 py-3">{t.quantidade_alunos}</td> {/* Exibindo a quantidade de alunos */}
-                <td className="px-4 py-3">
-                  <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${
-                    t.campus === 'IPOLON' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
-                  }`}>
-                    {t.campus === 'IPOLON' ? 'Campus Ipolon' : 'Campus Sede'}
-                  </span>
-                </td>
+                <td className="px-4 py-3">{new Date(t.data_entrada).toLocaleDateString()}</td> {/* Exibindo a data de entrada */}
                 <td className="px-4 py-3 text-right">
                   <Link
                     href={`/turmas/${t.id}/edit`}
                     className="inline-flex items-center gap-1.5 rounded-full bg-amber-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm ring-1 ring-amber-500/40 hover:bg-amber-700 hover:shadow transition"
                   >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg>
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z" /></svg>
                     Editar
                   </Link>
                   <button
                     onClick={() => del(t.id)}
                     className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm ring-1 ring-red-500/40 hover:bg-red-700 hover:shadow transition"
                   >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 3H8l1-3z"/></svg>
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 3H8l1-3z" /></svg>
                     Excluir
                   </button>
                 </td>

@@ -8,12 +8,13 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('turmas', function (Blueprint $table) {
             $table->id();
-            $table->string('sala', 100);              // nome/numero da sala
-            $table->unsignedSmallInteger('lugares');  // quantidade de lugares
-            $table->enum('campus', ['IPOLON', 'SEDE']);
-            $table->timestamps();
+            $table->string('nome');                        // Nome da turma
+            $table->date('data_entrada');                  // Data de entrada da turma
+            $table->integer('quantidade_alunos')->default(0); // Quantidade de alunos
+            $table->timestamps();                          // Timestamps de criação e atualização
         });
     }
+
     public function down(): void {
         Schema::dropIfExists('turmas');
     }
