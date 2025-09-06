@@ -17,16 +17,13 @@ export default function AuthenticatedLayout({ header, children, bgClass = 'bg-gr
           <div className="flex h-16 items-center justify-between">
             {/* Brand + Desktop Menu */}
             <div className="flex items-center gap-8">
-              <Link href="/dashboard" className="text-xl font-bold text-amber-600">MySchedU</Link>
+              {/* >>> marca agora vai para /professores */}
+              <Link href="/professores" className="text-xl font-bold text-amber-600">MySchedU</Link>
 
               <div className="hidden sm:-my-px sm:ms-10 sm:flex sm:items-center sm:gap-6">
-                
-                <NavLink href="/professores"               active={isActive('/professores')}>PROFESSORES</NavLink>
-                <NavLink href="/turmas"                    active={isActive('/turmas')}>TURMAS</NavLink>
-                {/* NOVO: Unidades Curriculares */}
-                <NavLink href="/unidades-curriculares"     active={isActive('/unidades-curriculares')}>
-                  UNIDADES CURRICULARES
-                </NavLink>
+                <NavLink href="/professores"           active={isActive('/professores')}>PROFESSORES</NavLink>
+                <NavLink href="/turmas"                active={isActive('/turmas')}>TURMAS</NavLink>
+                <NavLink href="/unidades-curriculares" active={isActive('/unidades-curriculares')}>UNIDADES CURRICULARES</NavLink>
               </div>
             </div>
 
@@ -55,13 +52,10 @@ export default function AuthenticatedLayout({ header, children, bgClass = 'bg-gr
         {/* Mobile menu */}
         <div className={`${open ? 'block' : 'hidden'} sm:hidden`}>
           <div className="pt-2 pb-3 space-y-1">
-            <ResponsiveNavLink href="/dashboard"             active={isActive('/dashboard')}>Dashboard</ResponsiveNavLink>
+            {/* removido /dashboard */}
             <ResponsiveNavLink href="/professores"           active={isActive('/professores')}>Professores</ResponsiveNavLink>
             <ResponsiveNavLink href="/turmas"                active={isActive('/turmas')}>Turmas</ResponsiveNavLink>
-            {/* NOVO: Unidades Curriculares */}
-            <ResponsiveNavLink href="/unidades-curriculares" active={isActive('/unidades-curriculares')}>
-              Unidades Curriculares
-            </ResponsiveNavLink>
+            <ResponsiveNavLink href="/unidades-curriculares" active={isActive('/unidades-curriculares')}>Unidades Curriculares</ResponsiveNavLink>
           </div>
 
           <div className="border-t border-gray-200 pt-4 pb-1">

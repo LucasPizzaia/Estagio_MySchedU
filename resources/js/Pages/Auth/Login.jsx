@@ -25,7 +25,11 @@ export default function Login({ status, canResetPassword }) {
       <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
         {/* Lado ESQUERDO - branco */}
         <div className="hidden lg:flex bg-white items-center justify-center relative p-8">
-          <Link href="/dashboard" className="text-5xl md:text-6xl font-extrabold text-amber-600 hover:opacity-80 transition-opacity">
+          {/* >>> alterado para /professores */}
+          <Link
+            href="/professores"
+            className="text-5xl md:text-6xl font-extrabold text-amber-600 hover:opacity-80 transition-opacity"
+          >
             MySchedU
           </Link>
           <div className="absolute bottom-4 left-6 text-sm tracking-wider text-gray-400 uppercase">

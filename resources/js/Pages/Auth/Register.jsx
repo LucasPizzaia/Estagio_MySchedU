@@ -26,7 +26,11 @@ export default function Register() {
       <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
         {/* ESQUERDA — branca */}
         <div className="hidden lg:flex bg-white items-center justify-center relative p-8">
-          <Link href="/dashboard" className="text-5xl md:text-6xl font-extrabold text-amber-600 hover:opacity-80 transition-opacity">
+          {/* >>> alterado para /professores */}
+          <Link
+            href="/professores"
+            className="text-5xl md:text-6xl font-extrabold text-amber-600 hover:opacity-80 transition-opacity"
+          >
             MySchedU
           </Link>
           <div className="absolute bottom-4 left-6 text-sm tracking-wider text-gray-400 uppercase">
@@ -42,7 +46,9 @@ export default function Register() {
             <form onSubmit={submit} className="space-y-4">
               {/* Nome */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-white/90">Nome</label>
+                <label htmlFor="name" className="block text-sm font-medium text-white/90">
+                  Nome
+                </label>
                 <input
                   id="name"
                   type="text"
@@ -58,7 +64,9 @@ export default function Register() {
 
               {/* E-mail */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-white/90">E-mail</label>
+                <label htmlFor="email" className="block text-sm font-medium text-white/90">
+                  E-mail
+                </label>
                 <input
                   id="email"
                   type="email"
@@ -74,7 +82,9 @@ export default function Register() {
 
               {/* Senha */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-white/90">Senha</label>
+                <label htmlFor="password" className="block text-sm font-medium text-white/90">
+                  Senha
+                </label>
                 <input
                   id="password"
                   type="password"
@@ -90,7 +100,9 @@ export default function Register() {
 
               {/* Confirmar senha */}
               <div>
-                <label htmlFor="password_confirmation" className="block text-sm font-medium text-white/90">Confirmar senha</label>
+                <label htmlFor="password_confirmation" className="block text-sm font-medium text-white/90">
+                  Confirmar senha
+                </label>
                 <input
                   id="password_confirmation"
                   type="password"
