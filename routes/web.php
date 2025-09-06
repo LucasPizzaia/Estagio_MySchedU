@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\TurmaController; 
+use App\Http\Controllers\UnidadeCurricularController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -18,9 +19,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', fn () => Inertia::render('Dashboard'))
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Professores
@@ -37,6 +36,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('unidades-curriculares', UnidadeCurricularController::class)
+        ->parameters(['unidades-curriculares' => 'unidadeCurricular']);
 });
 
 require __DIR__.'/auth.php';

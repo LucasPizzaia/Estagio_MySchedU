@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Professor;
+use App\Models\UnidadeCurricular;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Inertia\Inertia;
 
 class ProfessorController extends Controller
 {
     public function index()
     {
-        // Se quiser paginação: Professor::orderBy('matricula')->paginate(10)
         $professores = Professor::orderBy('matricula')->get();
 
         return Inertia::render('Professores/Index', [
@@ -21,7 +22,10 @@ class ProfessorController extends Controller
 
     public function create()
     {
-        return Inertia::render('Professores/Create');
+        return Inertia::render('Professores/Create', [
+            // UCs para multi-seleção
+            'ucs' => UnidadeCurricular::select('id','codigo','nome')->orderBy('codigo')->get(),
+        ]);
     }
 
     public function store(Request $request)
@@ -31,17 +35,39 @@ class ProfessorController extends Controller
             'nome'      => 'required|string|max:255',
             'sobrenome' => 'required|string|max:255',
             'email'     => 'required|email|max:255|unique:professors,email',
+
+            // novas entradas
+            'ucs'                 => ['array'],
+            'ucs.*'               => ['integer','exists:unidades_curriculares,id'],
+            'availability'        => ['array'],
+            'availability.*'      => ['array'],
+            'availability.*.*'    => ['in:s1,s2'],
         ]);
 
-        Professor::create($data);
+        $prof = Professor::create(Arr::except($data, ['ucs','availability']));
+
+        // sync UCs
+        $prof->unidadesCurriculares()->sync($data['ucs'] ?? []);
+
+        // sync disponibilidade
+        $this->syncDisponibilidade($prof, $data['availability'] ?? []);
 
         return redirect()->route('professores.index')->with('success', 'Professor criado com sucesso.');
     }
 
     public function edit(Professor $professor)
     {
+        // Disponibilidade agrupada por dia -> array de slots
+        $disp = $professor->disponibilidades()
+            ->get(['weekday','slot'])
+            ->mapToGroups(fn($d) => [$d->weekday => [$d->slot]])
+            ->map(fn($v) => $v->all());
+
         return Inertia::render('Professores/Edit', [
-            'professor' => $professor
+            'professor' => $professor,
+            'ucs'       => UnidadeCurricular::select('id','codigo','nome')->orderBy('codigo')->get(),
+            'ucs_ids'   => $professor->unidadesCurriculares()->pluck('unidade_curricular_id'),
+            'disp'      => $disp, // ex.: { mon:['s1'], tue:['s1','s2'], ... }
         ]);
     }
 
@@ -52,9 +78,18 @@ class ProfessorController extends Controller
             'nome'      => 'required|string|max:255',
             'sobrenome' => 'required|string|max:255',
             'email'     => 'required|email|max:255|unique:professors,email,' . $professor->id,
+
+            'ucs'                 => ['array'],
+            'ucs.*'               => ['integer','exists:unidades_curriculares,id'],
+            'availability'        => ['array'],
+            'availability.*'      => ['array'],
+            'availability.*.*'    => ['in:s1,s2'],
         ]);
 
-        $professor->update($data);
+        $professor->update(Arr::except($data, ['ucs','availability']));
+
+        $professor->unidadesCurriculares()->sync($data['ucs'] ?? []);
+        $this->syncDisponibilidade($professor, $data['availability'] ?? []);
 
         return redirect()->route('professores.index')->with('success', 'Professor atualizado com sucesso.');
     }
@@ -63,5 +98,20 @@ class ProfessorController extends Controller
     {
         $professor->delete();
         return redirect()->route('professores.index')->with('success', 'Professor excluído com sucesso.');
+    }
+
+    /** recria disponibilidade conforme checkboxes do form */
+    private function syncDisponibilidade(Professor $professor, array $availability): void
+    {
+        $professor->disponibilidades()->delete();
+        $rows = [];
+        foreach (['mon','tue','wed','thu','fri'] as $day) {
+            foreach (($availability[$day] ?? []) as $slot) {
+                $rows[] = ['weekday' => $day, 'slot' => $slot];
+            }
+        }
+        if ($rows) {
+            $professor->disponibilidades()->createMany($rows);
+        }
     }
 }
