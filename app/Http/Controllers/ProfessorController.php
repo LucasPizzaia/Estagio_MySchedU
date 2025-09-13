@@ -36,7 +36,7 @@ class ProfessorController extends Controller
             'sobrenome' => 'required|string|max:255',
             'email'     => 'required|email|max:255|unique:professors,email',
 
-            // novas entradas
+            
             'ucs'                 => ['array'],
             'ucs.*'               => ['integer','exists:unidades_curriculares,id'],
             'availability'        => ['array'],
