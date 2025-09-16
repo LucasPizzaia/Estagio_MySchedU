@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 
 const DAYS = [
   { key: 'mon', label: 'Seg' },
@@ -16,32 +16,34 @@ const SLOTS = [
 export default function Edit({ professor, ucs = [], ucs_ids = [], disp = {} }) {
   const { errors } = usePage().props;
 
-  const { data, setData, put, processing } = useForm({
-    matricula: professor.matricula || '',
-    nome: professor.nome || '',
-    sobrenome: professor.sobrenome || '',
-    email: professor.email || '',
-    // novos campos
-    ucs: ucs_ids || [],
-    availability: {
-      mon: disp?.mon || [],
-      tue: disp?.tue || [],
-      wed: disp?.wed || [],
-      thu: disp?.thu || [],
-      fri: disp?.fri || [],
-    },
+  const safeUcsIds = Array.isArray(ucs_ids) ? ucs_ids : [];
+  const safeDisp = {
+    mon: Array.isArray(disp?.mon) ? disp.mon : [],
+    tue: Array.isArray(disp?.tue) ? disp.tue : [],
+    wed: Array.isArray(disp?.wed) ? disp.wed : [],
+    thu: Array.isArray(disp?.thu) ? disp.thu : [],
+    fri: Array.isArray(disp?.fri) ? disp.fri : [],
+  };
+
+  const { data, setData, processing } = useForm({
+    matricula: professor?.matricula ?? '',
+    nome: professor?.nome ?? '',
+    sobrenome: professor?.sobrenome ?? '',
+    email: professor?.email ?? '',
+    ucs: safeUcsIds,
+    availability: safeDisp,
   });
 
   function submit(e) {
     e.preventDefault();
-    put(`/professores/${professor.id}`);
+    // ENVIA O ESTADO COMPLETO EXPLICITAMENTE
+    router.put(`/professores/${professor.id}`, data, { preserveScroll: true });
   }
 
   return (
     <AuthenticatedLayout header={null} bgClass="bg-amber-600">
       <Head title="Editar Professor" />
 
-      {/* Cabeçalho compacto */}
       <div className="mb-6 text-white">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-extrabold">Editar Professor</h2>
@@ -51,7 +53,6 @@ export default function Edit({ professor, ucs = [], ucs_ids = [], disp = {} }) {
         </div>
       </div>
 
-      {/* Card do formulário */}
       <form onSubmit={submit} className="max-w-5xl">
         <div className="rounded-2xl bg-white p-6 shadow-xl space-y-6">
           <div>
@@ -96,7 +97,6 @@ export default function Edit({ professor, ucs = [], ucs_ids = [], disp = {} }) {
             {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
           </div>
 
-          {/* UCs ministráveis */}
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">Unidades Curriculares que pode ministrar</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -124,7 +124,6 @@ export default function Edit({ professor, ucs = [], ucs_ids = [], disp = {} }) {
             {errors.ucs && <p className="mt-1 text-sm text-red-600">{errors.ucs}</p>}
           </div>
 
-          {/* Disponibilidade seg–sex × 2 horários */}
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">Disponibilidade (seg–sex)</label>
             <div className="overflow-hidden rounded-lg border">
