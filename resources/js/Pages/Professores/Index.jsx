@@ -17,7 +17,7 @@ export default function Index({ professores = [], flash }) {
         (p.email || '').toLowerCase().includes(s)
       );
     }
-    data.sort((a,b) => `${a[order]||''}`.localeCompare(`${b[order]||''}`));
+    data.sort((a, b) => `${a[order] || ''}`.localeCompare(`${b[order] || ''}`));
     return data;
   }, [professores, q, order]);
 
@@ -46,13 +46,13 @@ export default function Index({ professores = [], flash }) {
                 className="w-full px-3 py-2 text-gray-800 outline-none"
                 placeholder="Matrícula, nome ou e-mail..."
                 value={q}
-                onChange={e=>setQ(e.target.value)}
+                onChange={e => setQ(e.target.value)}
               />
             </div>
             <select
               className="rounded-lg bg-white text-gray-800 px-3 py-2"
               value={order}
-              onChange={e=>setOrder(e.target.value)}
+              onChange={e => setOrder(e.target.value)}
             >
               <option value="matricula">Ordenar: Matrícula</option>
               <option value="nome">Ordenar: Nome</option>
@@ -64,7 +64,7 @@ export default function Index({ professores = [], flash }) {
               href="/professores/create"
               className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 font-semibold text-amber-700 shadow-sm hover:shadow transition"
             >
-              <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M13 11h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 2 0v6z"/></svg>
+              <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M13 11h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 2 0v6z" /></svg>
               Novo Professor
             </Link>
           </div>
@@ -114,21 +114,41 @@ export default function Index({ professores = [], flash }) {
                     <a className="text-amber-700 hover:underline" href={`mailto:${p.email}`}>{p.email}</a>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {/* Botões modernos */}
-                    <Link
-                      href={`/professores/${p.id}/edit`}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-amber-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm ring-1 ring-amber-500/40 hover:bg-amber-700 hover:shadow transition"
-                    >
-                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg>
-                      Editar
-                    </Link>
-                    <button
-                      onClick={() => del(p.id)}
-                      className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm ring-1 ring-red-500/40 hover:bg-red-700 hover:shadow transition"
-                    >
-                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 3H8l1-3z"/></svg>
-                      Excluir
-                    </button>
+                    {/* Botões organizados e menores */}
+                    <div className="flex gap-2 justify-end">
+                      {/* Botão Visualizar */}
+                      <Link
+                        href={`/professores/${p.id}`}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-amber-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm ring-1 ring-amber-500/40 hover:bg-amber-700 hover:shadow transition"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" />
+                        </svg>
+                        Visualizar
+                      </Link>
+
+                      {/* Botão Editar */}
+                      <Link
+                        href={`/professores/${p.id}/edit`}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-amber-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm ring-1 ring-amber-500/40 hover:bg-amber-700 hover:shadow transition"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z" />
+                        </svg>
+                        Editar
+                      </Link>
+
+                      {/* Botão Excluir */}
+                      <button
+                        onClick={() => del(p.id)}
+                        className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm ring-1 ring-red-500/40 hover:bg-red-700 hover:shadow transition"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 3H8l1-3z" />
+                        </svg>
+                        Excluir
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -150,7 +170,9 @@ export default function Index({ professores = [], flash }) {
         className="fixed bottom-6 right-6 inline-flex items-center justify-center rounded-full bg-white text-amber-700 h-14 w-14 shadow-lg ring-1 ring-white/40 hover:shadow-xl transition"
         aria-label="Novo Professor"
       >
-        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"><path d="M13 11h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 2 0v6z"/></svg>
+        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M13 11h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 2 0v6z" />
+        </svg>
       </Link>
     </AuthenticatedLayout>
   );

@@ -36,6 +36,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('unidades-curriculares', UnidadeCurricularController::class)
         ->parameters(['unidades-curriculares' => 'unidadeCurricular']);
 
+    Route::get('/professores/{professor}', [ProfessorController::class, 'show'])->name('professores.show');
+
+
     // Perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -23,7 +23,7 @@ export default function Create({ ucs = [] }) {
     sobrenome: '',
     email: '',
     ucs: [],
-    availability: { mon: [], tue: [], wed: [], thu: [], fri: [] }, // Inicializando com valores vazios
+    availability: { mon: [], tue: [], wed: [], thu: [], fri: [] },
   });
 
   function submit(e) {
@@ -34,22 +34,23 @@ export default function Create({ ucs = [] }) {
   }
 
   return (
-    <AuthenticatedLayout header={null}>
+    <AuthenticatedLayout header={null} bgClass="bg-amber-600">
       <Head title="Cadastrar Professor" />
+
       {/* Faixa laranja */}
-      <div className="-mx-4 sm:-mx-6 lg:-mx-8 mb-6">
+   <div className="-mx-4 sm:-mx-6 lg:-mx-8 mb-6">
         <div className="bg-gradient-to-r from-amber-600 to-amber-500 text-white px-4 sm:px-6 lg:px-8 py-6 shadow">
           <div className="mx-auto max-w-7xl flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Cadastrar Professor</h2>
-            <Link href="/professores" className="rounded-md bg-white/95 px-4 py-2 font-semibold text-amber-700 hover:bg-white">
-              Voltar
-            </Link>
-          </div>
+          <h2 className="text-3xl font-extrabold">Cadastrar Professor </h2>
+          <Link href="/professores" className="rounded-lg bg-white px-4 py-2 font-semibold text-amber-700 shadow-sm hover:shadow transition">
+            Voltar
+          </Link>
+         </div>
         </div>
       </div>
 
       {/* Card de formulário */}
-      <form onSubmit={submit} className="max-w-5xl space-y-6">
+      <form onSubmit={submit} className="max-w-5xl space-y-6 mx-auto">
         <div className="rounded-xl border bg-white p-6 shadow-sm">
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="sm:col-span-2">

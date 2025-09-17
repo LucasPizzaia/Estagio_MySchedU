@@ -65,6 +65,18 @@ class ProfessorController extends Controller
         ]);
     }
 
+    public function show(Professor $professor)
+{
+    $availability = json_decode($professor->availability, true);
+
+    return Inertia::render('Professores/Show', [
+        'professor' => $professor,
+        'ucs' => $professor->unidadesCurriculares,  // Passando as unidades curriculares associadas
+        'availability' => $availability,  // Passando a disponibilidade para a view
+    ]);
+}
+
+
     public function update(Request $request, Professor $professor)
     {
         $data = $request->validate([
