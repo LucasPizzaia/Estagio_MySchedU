@@ -46,10 +46,8 @@ class ProfessorController extends Controller
 
         $prof = Professor::create(Arr::except($data, ['ucs','availability']));
 
-        // sync UCs
         $prof->unidadesCurriculares()->sync($data['ucs'] ?? []);
 
-        // sync disponibilidade
         $this->syncDisponibilidade($prof, $data['availability'] ?? []);
 
         return redirect()->route('professores.index')->with('success', 'Professor criado com sucesso.');
@@ -57,7 +55,6 @@ class ProfessorController extends Controller
 
     public function edit(Professor $professor)
     {
-        // Disponibilidade agrupada por dia -> array de slots
         $disp = $professor->disponibilidades()
             ->get(['weekday','slot'])
             ->mapToGroups(fn($d) => [$d->weekday => [$d->slot]])
@@ -100,7 +97,6 @@ class ProfessorController extends Controller
         return redirect()->route('professores.index')->with('success', 'Professor excluído com sucesso.');
     }
 
-    /** recria disponibilidade conforme checkboxes do form */
     private function syncDisponibilidade(Professor $professor, array $availability): void
     {
         $professor->disponibilidades()->delete();
