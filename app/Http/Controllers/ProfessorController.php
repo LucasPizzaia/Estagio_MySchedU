@@ -23,8 +23,7 @@ class ProfessorController extends Controller
     public function create()
     {
         return Inertia::render('Professores/Create', [
-            // UCs para multi-seleção
-            'ucs' => UnidadeCurricular::select('id','codigo','nome')->orderBy('codigo')->get(),
+            'ucs' => UnidadeCurricular::select('id', 'codigo', 'nome')->orderBy('codigo')->get(),
         ]);
     }
 
@@ -32,39 +31,37 @@ class ProfessorController extends Controller
     {
         $data = $request->validate([
             'matricula' => 'required|string|max:50|unique:professors,matricula',
-            'nome'      => 'required|string|max:255',
+            'nome' => 'required|string|max:255',
             'sobrenome' => 'required|string|max:255',
-            'email'     => 'required|email|max:255|unique:professors,email',
-
-            
-            'ucs'                 => ['array'],
-            'ucs.*'               => ['integer','exists:unidades_curriculares,id'],
-            'availability'        => ['array'],
-            'availability.*'      => ['array'],
-            'availability.*.*'    => ['in:s1,s2'],
+            'email' => 'required|email|max:255|unique:professors,email',
+            'ucs' => ['array'],
+            'ucs.*' => ['integer', 'exists:unidades_curriculares,id'],
+            'availability' => ['array'],
         ]);
 
-        $prof = Professor::create(Arr::except($data, ['ucs','availability']));
+        // Criando o professor e salvando a disponibilidade no mesmo momento
+        $prof = Professor::create(Arr::except($data, ['ucs', 'availability']));
 
+        // Sincroniza as Unidades Curriculares
         $prof->unidadesCurriculares()->sync($data['ucs'] ?? []);
 
-        $this->syncDisponibilidade($prof, $data['availability'] ?? []);
+        // Salva a disponibilidade
+        $prof->availability = json_encode($data['availability']);  // Convertendo para JSON se necessário
+        $prof->save();
 
         return redirect()->route('professores.index')->with('success', 'Professor criado com sucesso.');
     }
 
     public function edit(Professor $professor)
     {
-        $disp = $professor->disponibilidades()
-            ->get(['weekday','slot'])
-            ->mapToGroups(fn($d) => [$d->weekday => [$d->slot]])
-            ->map(fn($v) => $v->all());
+        // Recupera a disponibilidade
+        $availability = json_decode($professor->availability, true); // Decodificando os dados salvos como JSON
 
         return Inertia::render('Professores/Edit', [
             'professor' => $professor,
-            'ucs'       => UnidadeCurricular::select('id','codigo','nome')->orderBy('codigo')->get(),
-            'ucs_ids'   => $professor->unidadesCurriculares()->pluck('unidade_curricular_id'),
-            'disp'      => $disp, // ex.: { mon:['s1'], tue:['s1','s2'], ... }
+            'ucs' => UnidadeCurricular::select('id', 'codigo', 'nome')->orderBy('codigo')->get(),
+            'ucs_ids' => $professor->unidadesCurriculares()->pluck('unidade_curricular_id'),
+            'disp' => $availability,  // Passando a disponibilidade para a view
         ]);
     }
 
@@ -72,21 +69,22 @@ class ProfessorController extends Controller
     {
         $data = $request->validate([
             'matricula' => 'required|string|max:50|unique:professors,matricula,' . $professor->id,
-            'nome'      => 'required|string|max:255',
+            'nome' => 'required|string|max:255',
             'sobrenome' => 'required|string|max:255',
-            'email'     => 'required|email|max:255|unique:professors,email,' . $professor->id,
-
-            'ucs'                 => ['array'],
-            'ucs.*'               => ['integer','exists:unidades_curriculares,id'],
-            'availability'        => ['array'],
-            'availability.*'      => ['array'],
-            'availability.*.*'    => ['in:s1,s2'],
+            'email' => 'required|email|max:255|unique:professors,email,' . $professor->id,
+            'ucs' => ['array'],
+            'ucs.*' => ['integer', 'exists:unidades_curriculares,id'],
+            'availability' => ['array'],
         ]);
 
-        $professor->update(Arr::except($data, ['ucs','availability']));
+        $professor->update(Arr::except($data, ['ucs', 'availability']));
 
+        // Sincroniza as Unidades Curriculares
         $professor->unidadesCurriculares()->sync($data['ucs'] ?? []);
-        $this->syncDisponibilidade($professor, $data['availability'] ?? []);
+
+        // Atualiza a disponibilidade
+        $professor->availability = json_encode($data['availability']);
+        $professor->save();
 
         return redirect()->route('professores.index')->with('success', 'Professor atualizado com sucesso.');
     }
@@ -95,19 +93,5 @@ class ProfessorController extends Controller
     {
         $professor->delete();
         return redirect()->route('professores.index')->with('success', 'Professor excluído com sucesso.');
-    }
-
-    private function syncDisponibilidade(Professor $professor, array $availability): void
-    {
-        $professor->disponibilidades()->delete();
-        $rows = [];
-        foreach (['mon','tue','wed','thu','fri'] as $day) {
-            foreach (($availability[$day] ?? []) as $slot) {
-                $rows[] = ['weekday' => $day, 'slot' => $slot];
-            }
-        }
-        if ($rows) {
-            $professor->disponibilidades()->createMany($rows);
-        }
     }
 }

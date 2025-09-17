@@ -8,6 +8,7 @@ const DAYS = [
   { key: 'thu', label: 'Qui' },
   { key: 'fri', label: 'Sex' },
 ];
+
 const SLOTS = [
   { key: 's1', label: '19:00–20:30' },
   { key: 's2', label: '20:45–22:10' },
@@ -21,22 +22,20 @@ export default function Create({ ucs = [] }) {
     nome: '',
     sobrenome: '',
     email: '',
-    // novos campos
     ucs: [],
-    availability: { mon:[], tue:[], wed:[], thu:[], fri:[] },
+    availability: { mon: [], tue: [], wed: [], thu: [], fri: [] }, // Inicializando com valores vazios
   });
 
   function submit(e) {
     e.preventDefault();
     post('/professores', {
-      onSuccess: () => reset('matricula','nome','sobrenome','email','ucs','availability'),
+      onSuccess: () => reset('matricula', 'nome', 'sobrenome', 'email', 'ucs', 'availability'),
     });
   }
 
   return (
     <AuthenticatedLayout header={null}>
       <Head title="Cadastrar Professor" />
-
       {/* Faixa laranja */}
       <div className="-mx-4 sm:-mx-6 lg:-mx-8 mb-6">
         <div className="bg-gradient-to-r from-amber-600 to-amber-500 text-white px-4 sm:px-6 lg:px-8 py-6 shadow">
@@ -176,7 +175,7 @@ export default function Create({ ucs = [] }) {
           </div>
 
           <div className="mt-6 flex gap-2">
-            <Link href="/professores" className="rounded border px-4 py-2 text-gray-700 hover:bg-gray-50">
+            <Link href="/professores" className="rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50">
               Cancelar
             </Link>
             <button

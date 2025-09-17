@@ -8,6 +8,7 @@ const DAYS = [
   { key: 'thu', label: 'Qui' },
   { key: 'fri', label: 'Sex' },
 ];
+
 const SLOTS = [
   { key: 's1', label: '19:00–20:30' },
   { key: 's2', label: '20:45–22:10' },
@@ -16,6 +17,7 @@ const SLOTS = [
 export default function Edit({ professor, ucs = [], ucs_ids = [], disp = {} }) {
   const { errors } = usePage().props;
 
+  // Garantindo que disp seja um objeto com valores padrão
   const safeUcsIds = Array.isArray(ucs_ids) ? ucs_ids : [];
   const safeDisp = {
     mon: Array.isArray(disp?.mon) ? disp.mon : [],
@@ -31,12 +33,11 @@ export default function Edit({ professor, ucs = [], ucs_ids = [], disp = {} }) {
     sobrenome: professor?.sobrenome ?? '',
     email: professor?.email ?? '',
     ucs: safeUcsIds,
-    availability: safeDisp,
+    availability: safeDisp,  // Inicializando a disponibilidade com os dados passados
   });
 
   function submit(e) {
     e.preventDefault();
-    // ENVIA O ESTADO COMPLETO EXPLICITAMENTE
     router.put(`/professores/${professor.id}`, data, { preserveScroll: true });
   }
 
