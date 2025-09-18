@@ -116,7 +116,7 @@ export default function Login({ status, canResetPassword }) {
               >
                 Entrar
               </button>
-
+              
               {/* Registrar (opcional) */}
               <div className="text-center text-sm text-white/90">
                 Não tem conta?{' '}
