@@ -55,7 +55,6 @@ export default function Edit({ professor, ucs = [], ucs_ids = [], disp = {} }) {
         </div>
       </div>
 
-      {/* Centralização do card */}
       <div className="flex justify-center items-center min-h-screen">
         <form onSubmit={submit} className="max-w-5xl w-full">
           <div className="rounded-2xl bg-white p-6 shadow-xl space-y-6">
@@ -171,7 +170,6 @@ export default function Edit({ professor, ucs = [], ucs_ids = [], disp = {} }) {
                   </tbody>
                 </table>
               </div>
-              <p className="mt-1 text-xs text-gray-500">S1: 19:00–20:30 • S2: 20:45–22:10</p>
               {errors.availability && <p className="mt-1 text-sm text-red-600">{errors.availability}</p>}
             </div>
 

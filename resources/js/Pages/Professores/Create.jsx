@@ -37,7 +37,6 @@ export default function Create({ ucs = [] }) {
     <AuthenticatedLayout header={null} bgClass="bg-amber-600">
       <Head title="Cadastrar Professor" />
 
-      {/* Faixa laranja */}
    <div className="-mx-4 sm:-mx-6 lg:-mx-8 mb-6">
         <div className="bg-gradient-to-r from-amber-600 to-amber-500 text-white px-4 sm:px-6 lg:px-8 py-6 shadow">
           <div className="mx-auto max-w-7xl flex items-center justify-between">
@@ -49,7 +48,6 @@ export default function Create({ ucs = [] }) {
         </div>
       </div>
 
-      {/* Card de formulário */}
       <form onSubmit={submit} className="max-w-5xl space-y-6 mx-auto">
         <div className="rounded-xl border bg-white p-6 shadow-sm">
           <div className="grid gap-5 sm:grid-cols-2">
@@ -98,7 +96,6 @@ export default function Create({ ucs = [] }) {
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
 
-            {/* UCs ministráveis */}
             <div className="sm:col-span-2">
               <label className="mb-2 block text-sm font-medium text-gray-700">Unidades Curriculares que pode ministrar</label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -126,7 +123,6 @@ export default function Create({ ucs = [] }) {
               {errors.ucs && <p className="mt-1 text-sm text-red-600">{errors.ucs}</p>}
             </div>
 
-            {/* Disponibilidade seg–sex × 2 horários */}
             <div className="sm:col-span-2">
               <label className="mb-2 block text-sm font-medium text-gray-700">Disponibilidade (seg–sex)</label>
               <div className="overflow-hidden rounded-lg border">
@@ -170,7 +166,6 @@ export default function Create({ ucs = [] }) {
                   </tbody>
                 </table>
               </div>
-              <p className="mt-1 text-xs text-gray-500">S1: 19:00–20:30 • S2: 20:45–22:10</p>
               {errors.availability && <p className="mt-1 text-sm text-red-600">{errors.availability}</p>}
             </div>
           </div>
