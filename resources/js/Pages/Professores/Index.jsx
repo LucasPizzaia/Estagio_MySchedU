@@ -116,16 +116,7 @@ export default function Index({ professores = [], flash }) {
                   <td className="px-4 py-3 text-right">
                     {/* Botões organizados e menores */}
                     <div className="flex gap-2 justify-end">
-                      {/* Botão Visualizar */}
-                      <Link
-                        href={`/professores/${p.id}`}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-amber-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm ring-1 ring-amber-500/40 hover:bg-amber-700 hover:shadow transition"
-                      >
-                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" />
-                        </svg>
-                        Visualizar
-                      </Link>
+            
 
                       {/* Botão Editar */}
                       <Link
