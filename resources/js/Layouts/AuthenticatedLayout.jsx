@@ -15,9 +15,7 @@ export default function AuthenticatedLayout({ header, children, bgClass = 'bg-gr
       <nav className="bg-white border-b">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
-            {/* Brand + Desktop Menu */}
             <div className="flex items-center gap-8">
-              {/* >>> marca agora vai para /professores */}
               <Link href="/professores" className="text-xl font-bold text-amber-600">MySchedU</Link>
 
               <div className="hidden sm:-my-px sm:ms-10 sm:flex sm:items-center sm:gap-6">
