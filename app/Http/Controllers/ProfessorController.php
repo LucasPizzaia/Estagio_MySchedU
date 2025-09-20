@@ -39,14 +39,11 @@ class ProfessorController extends Controller
             'availability' => ['array'],
         ]);
 
-        // Criando o professor e salvando a disponibilidade no mesmo momento
         $prof = Professor::create(Arr::except($data, ['ucs', 'availability']));
 
-        // Sincroniza as Unidades Curriculares
         $prof->unidadesCurriculares()->sync($data['ucs'] ?? []);
 
-        // Salva a disponibilidade
-        $prof->availability = json_encode($data['availability']);  // Convertendo para JSON se necessário
+        $prof->availability = json_encode($data['availability']); 
         $prof->save();
 
         return redirect()->route('professores.index')->with('success', 'Professor criado com sucesso.');
@@ -54,14 +51,13 @@ class ProfessorController extends Controller
 
     public function edit(Professor $professor)
     {
-        // Recupera a disponibilidade
-        $availability = json_decode($professor->availability, true); // Decodificando os dados salvos como JSON
+        $availability = json_decode($professor->availability, true); 
 
         return Inertia::render('Professores/Edit', [
             'professor' => $professor,
             'ucs' => UnidadeCurricular::select('id', 'codigo', 'nome')->orderBy('codigo')->get(),
             'ucs_ids' => $professor->unidadesCurriculares()->pluck('unidade_curricular_id'),
-            'disp' => $availability,  // Passando a disponibilidade para a view
+            'disp' => $availability,  
         ]);
     }
 
@@ -71,8 +67,8 @@ class ProfessorController extends Controller
 
     return Inertia::render('Professores/Show', [
         'professor' => $professor,
-        'ucs' => $professor->unidadesCurriculares,  // Passando as unidades curriculares associadas
-        'availability' => $availability,  // Passando a disponibilidade para a view
+        'ucs' => $professor->unidadesCurriculares,  
+        'availability' => $availability,
     ]);
 }
 
@@ -91,10 +87,9 @@ class ProfessorController extends Controller
 
         $professor->update(Arr::except($data, ['ucs', 'availability']));
 
-        // Sincroniza as Unidades Curriculares
         $professor->unidadesCurriculares()->sync($data['ucs'] ?? []);
 
-        // Atualiza a disponibilidade
+        
         $professor->availability = json_encode($data['availability']);
         $professor->save();
 
