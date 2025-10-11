@@ -28,19 +28,19 @@ export default function Index({ professores = [], flash }) {
   };
 
   return (
-    <AuthenticatedLayout header={null} bgClass="bg-amber-600">
+    <AuthenticatedLayout header={null} bgClass="bg-white">
       <Head title="Professores" />
 
-      {/* Barra superior (transparente) */}
-      <div className="mb-6 text-white">
+      {/* Barra superior (com fundo cinza e texto escuro) */}
+      <div className="mb-6 text-gray-800">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-3xl font-extrabold leading-tight">Professores</h1>
-            <p className="text-white/90 mt-1">Gerencie cadastro e dados de professores</p>
+            <p className="text-gray-600 mt-1">Gerencie cadastro e dados de professores</p>
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="flex rounded-lg overflow-hidden bg-white">
+            <div className="flex rounded-lg overflow-hidden border border-gray-300">
               <span className="hidden sm:inline-flex items-center px-3 text-sm text-gray-500">Buscar</span>
               <input
                 className="w-full px-3 py-2 text-gray-800 outline-none"
@@ -50,7 +50,7 @@ export default function Index({ professores = [], flash }) {
               />
             </div>
             <select
-              className="rounded-lg bg-white text-gray-800 px-3 py-2"
+              className="rounded-lg border border-gray-300 text-gray-800 px-3 py-2"
               value={order}
               onChange={e => setOrder(e.target.value)}
             >
@@ -62,7 +62,7 @@ export default function Index({ professores = [], flash }) {
 
             <Link
               href="/professores/create"
-              className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 font-semibold text-amber-700 shadow-sm hover:shadow transition"
+              className="inline-flex items-center justify-center rounded-lg bg-amber-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-amber-700 transition"
             >
               <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M13 11h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 2 0v6z" /></svg>
               Novo Professor
@@ -72,17 +72,17 @@ export default function Index({ professores = [], flash }) {
       </div>
 
       {flash && (
-        <div className="mb-4 rounded-lg border border-white/30 bg-white/10 px-4 py-2 text-white">
+        <div className="mb-4 rounded-lg border border-amber-500 bg-amber-50 px-4 py-2 text-amber-800">
           {flash}
         </div>
       )}
 
       {/* Card branco com a lista */}
-      <div className="rounded-2xl bg-white shadow-xl overflow-hidden">
+      <div className="rounded-2xl bg-white shadow-xl overflow-hidden border border-gray-200">
         <div className="overflow-auto" style={{ maxHeight: '65vh' }}>
           <table className="w-full text-left">
-            <thead className="sticky top-0 bg-amber-50">
-              <tr className="text-gray-700">
+            <thead className="sticky top-0 bg-amber-600">
+              <tr className="text-white">
                 <th className="px-4 py-3 w-40">Matrícula</th>
                 <th className="px-4 py-3">Professor</th>
                 <th className="px-4 py-3">Sobrenome</th>
@@ -92,7 +92,7 @@ export default function Index({ professores = [], flash }) {
             </thead>
             <tbody>
               {list.map((p, i) => (
-                <tr key={p.id} className={i % 2 ? 'bg-amber-50/40' : 'bg-white'}>
+                <tr key={p.id} className={i % 2 ? 'bg-gray-50' : 'bg-white'}>
                   <td className="px-4 py-3">
                     <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">
                       {p.matricula}
@@ -100,7 +100,7 @@ export default function Index({ professores = [], flash }) {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full bg-amber-600/10 text-amber-700 flex items-center justify-center font-bold">
+                      <div className="h-9 w-9 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold">
                         {(p.nome?.[0] || 'P').toUpperCase()}
                       </div>
                       <div className="leading-tight">
@@ -111,17 +111,13 @@ export default function Index({ professores = [], flash }) {
                   </td>
                   <td className="px-4 py-3">{p.sobrenome}</td>
                   <td className="px-4 py-3">
-                    <a className="text-amber-700 hover:underline" href={`mailto:${p.email}`}>{p.email}</a>
+                    <a className="text-amber-600 hover:underline" href={`mailto:${p.email}`}>{p.email}</a>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {/* Botões organizados e menores */}
                     <div className="flex gap-2 justify-end">
-            
-
-                      {/* Botão Editar */}
                       <Link
                         href={`/professores/${p.id}/edit`}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-amber-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm ring-1 ring-amber-500/40 hover:bg-amber-700 hover:shadow transition"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-amber-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-amber-700 transition"
                       >
                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z" />
@@ -129,10 +125,9 @@ export default function Index({ professores = [], flash }) {
                         Editar
                       </Link>
 
-                      {/* Botão Excluir */}
                       <button
                         onClick={() => del(p.id)}
-                        className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm ring-1 ring-red-500/40 hover:bg-red-700 hover:shadow transition"
+                        className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-red-700 transition"
                       >
                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 3H8l1-3z" />
@@ -158,7 +153,7 @@ export default function Index({ professores = [], flash }) {
       {/* Botão flutuante */}
       <Link
         href="/professores/create"
-        className="fixed bottom-6 right-6 inline-flex items-center justify-center rounded-full bg-white text-amber-700 h-14 w-14 shadow-lg ring-1 ring-white/40 hover:shadow-xl transition"
+        className="fixed bottom-6 right-6 inline-flex items-center justify-center rounded-full bg-amber-600 text-white h-14 w-14 shadow-lg hover:bg-amber-700 transition"
         aria-label="Novo Professor"
       >
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
