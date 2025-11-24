@@ -15,9 +15,15 @@ const TIPOS = [
 
 export default function Create() {
   const { errors } = usePage().props;
+
   const { data, setData, post, processing } = useForm({
-    codigo: '', nome: '', grupo: '', carga_horaria: '',
-    metodo: 'teorica', tipo: 'core', descricao: '',
+    codigo: '',
+    nome: '',
+    grupo: '',
+    carga_horaria: '',
+    metodo: 'teorica',
+    tipo: 'core',
+    descricao: '',
   });
 
   function submit(e) {
@@ -26,124 +32,167 @@ export default function Create() {
   }
 
   return (
-    <AuthenticatedLayout header={null} bgClass="bg-amber-600">
-      <Head title="Nova UC" />
+    <AuthenticatedLayout header={null} bgClass="bg-white">
+      <Head title="Nova Unidade Curricular" />
 
-      {/* Header laranja igual Professores */}
-      <div className="mb-6 text-white">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="text-3xl font-extrabold leading-tight">Nova Unidade Curricular</h1>
-            <p className="mt-1 text-white/90">Preencha os dados da unidade curricular</p>
-          </div>
-
-          <div className="flex gap-2">
-            <Link
-              href="/unidades-curriculares"
-              className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 font-semibold text-amber-700 shadow-sm transition hover:shadow"
-            >
-              Voltar
-            </Link>
-          </div>
+      {/* HEADER PREMIUM */}
+      <div className="max-w-6xl mx-auto mb-10 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-amber-700 tracking-tight">
+            Nova Unidade Curricular
+          </h1>
+          <p className="text-gray-500 mt-1 text-sm">
+            Preencha os dados para cadastrar uma nova UC.
+          </p>
         </div>
+
+        <Link
+          href="/unidades-curriculares"
+          className="rounded-lg border border-amber-600 px-4 py-2 font-semibold text-amber-700 hover:bg-amber-50 shadow-sm transition"
+        >
+          Voltar
+        </Link>
       </div>
 
-      {/* Card branco com o formulário */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-xl">
-        <form onSubmit={submit} className="p-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="md:col-span-1">
-            <label className="block text-sm font-medium text-gray-700">Código *</label>
+      {/* CARD DO FORMULÁRIO */}
+      <form
+        onSubmit={submit}
+        className="max-w-6xl mx-auto rounded-2xl border border-amber-200 bg-white p-8 shadow-lg space-y-8"
+      >
+
+        {/* GRID CAMPOS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          {/* Código */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Código <span className="text-amber-600">*</span>
+            </label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="w-full rounded-xl border border-amber-300 bg-white px-4 py-2.5 shadow-sm
+              focus:ring-2 focus:ring-amber-500 outline-none transition"
               value={data.codigo}
-              onChange={e=>setData('codigo', e.target.value)}
+              onChange={(e) => setData('codigo', e.target.value)}
             />
-            {errors.codigo && <p className="mt-1 text-sm text-red-600">{errors.codigo}</p>}
+            {errors.codigo && <p className="text-red-600 text-sm mt-1">{errors.codigo}</p>}
           </div>
 
-          <div className="md:col-span-1">
-            <label className="block text-sm font-medium text-gray-700">Nome *</label>
+          {/* Nome */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Nome <span className="text-amber-600">*</span>
+            </label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="w-full rounded-xl border border-amber-300 bg-white px-4 py-2.5 shadow-sm focus:ring-amber-500"
               value={data.nome}
-              onChange={e=>setData('nome', e.target.value)}
+              onChange={(e) => setData('nome', e.target.value)}
             />
-            {errors.nome && <p className="mt-1 text-sm text-red-600">{errors.nome}</p>}
+            {errors.nome && <p className="text-red-600 text-sm mt-1">{errors.nome}</p>}
           </div>
 
+          {/* Grupo */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Grupo</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Grupo
+            </label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="w-full rounded-xl border border-amber-300 px-4 py-2.5 shadow-sm focus:ring-amber-500"
               value={data.grupo}
-              onChange={e=>setData('grupo', e.target.value)}
+              onChange={(e) => setData('grupo', e.target.value)}
             />
-            {errors.grupo && <p className="mt-1 text-sm text-red-600">{errors.grupo}</p>}
+            {errors.grupo && <p className="text-red-600 text-sm mt-1">{errors.grupo}</p>}
           </div>
 
+          {/* Carga Horária */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Carga Horária (h) *</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Carga Horária (h) <span className="text-amber-600">*</span>
+            </label>
             <input
-              type="number" min="1"
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              type="number"
+              min="1"
+              className="w-full rounded-xl border border-amber-300 px-4 py-2.5 shadow-sm focus:ring-amber-500"
               value={data.carga_horaria}
-              onChange={e=>setData('carga_horaria', e.target.value)}
+              onChange={(e) => setData('carga_horaria', e.target.value)}
             />
-            {errors.carga_horaria && <p className="mt-1 text-sm text-red-600">{errors.carga_horaria}</p>}
+            {errors.carga_horaria && (
+              <p className="text-red-600 text-sm mt-1">{errors.carga_horaria}</p>
+            )}
           </div>
 
+          {/* Método */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Método *</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Método <span className="text-amber-600">*</span>
+            </label>
             <select
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="w-full rounded-xl border border-amber-300 px-4 py-2.5 shadow-sm focus:ring-amber-500"
               value={data.metodo}
-              onChange={e=>setData('metodo', e.target.value)}
+              onChange={(e) => setData('metodo', e.target.value)}
             >
-              {METODOS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+              {METODOS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
             </select>
-            {errors.metodo && <p className="mt-1 text-sm text-red-600">{errors.metodo}</p>}
+            {errors.metodo && <p className="text-red-600 text-sm mt-1">{errors.metodo}</p>}
           </div>
 
+          {/* Tipo */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Tipo *</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Tipo <span className="text-amber-600">*</span>
+            </label>
             <select
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="w-full rounded-xl border border-amber-300 px-4 py-2.5 shadow-sm focus:ring-amber-500"
               value={data.tipo}
-              onChange={e=>setData('tipo', e.target.value)}
+              onChange={(e) => setData('tipo', e.target.value)}
             >
-              {TIPOS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              {TIPOS.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
             </select>
-            {errors.tipo && <p className="mt-1 text-sm text-red-600">{errors.tipo}</p>}
+            {errors.tipo && <p className="text-red-600 text-sm mt-1">{errors.tipo}</p>}
           </div>
 
+          {/* Descrição */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700">Descrição</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Descrição
+            </label>
             <textarea
-              rows={4}
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              rows="4"
+              className="w-full rounded-xl border border-amber-300 px-4 py-2.5 shadow-sm focus:ring-amber-500"
               value={data.descricao}
-              onChange={e=>setData('descricao', e.target.value)}
+              onChange={(e) => setData('descricao', e.target.value)}
             />
-            {errors.descricao && <p className="mt-1 text-sm text-red-600">{errors.descricao}</p>}
+            {errors.descricao && <p className="text-red-600 text-sm mt-1">{errors.descricao}</p>}
           </div>
 
-          <div className="md:col-span-2 flex justify-end gap-2 pt-2">
-            <Link
-              href="/unidades-curriculares"
-              className="inline-flex items-center rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
-            >
-              Cancelar
-            </Link>
-            <button
-              type="submit"
-              disabled={processing}
-              className="inline-flex items-center rounded-full bg-amber-600 px-6 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-amber-500/40 hover:bg-amber-700 disabled:opacity-60"
-            >
-              {processing ? 'Salvando...' : 'Salvar'}
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+
+        {/* BOTÕES */}
+        <div className="flex justify-end gap-3 pt-2">
+          <Link
+            href="/unidades-curriculares"
+            className="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 transition"
+          >
+            Cancelar
+          </Link>
+
+          <button
+            type="submit"
+            disabled={processing}
+            className="rounded-lg bg-amber-600 px-6 py-2.5 text-white font-semibold shadow hover:bg-amber-700 transition disabled:opacity-50"
+          >
+            {processing ? 'Salvando...' : 'Salvar'}
+          </button>
+        </div>
+
+      </form>
     </AuthenticatedLayout>
   );
 }

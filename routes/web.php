@@ -2,7 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfessorController;
-use App\Http\Controllers\TurmaController; 
+use App\Http\Controllers\TurmaController;
+use App\Http\Controllers\SalaController;
 use App\Http\Controllers\UnidadeCurricularController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
