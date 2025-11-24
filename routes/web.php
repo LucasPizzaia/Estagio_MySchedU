@@ -32,6 +32,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('unidades-curriculares', UnidadeCurricularController::class)
         ->parameters(['unidades-curriculares' => 'unidadeCurricular']);
 
+ Route::resource('salas', SalaController::class)
+        ->parameters(['salas' => 'sala']);
 
 
     

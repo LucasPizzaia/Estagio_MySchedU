@@ -18,10 +18,14 @@ export default function AuthenticatedLayout({ header, children, bgClass = 'bg-am
             <div className="flex items-center gap-8">
               <Link href="/professores" className="text-xl font-bold text-white">MySchedU</Link>
 
+              {/* MENU DESKTOP */}
               <div className="hidden sm:-my-px sm:ms-10 sm:flex sm:items-center sm:gap-6">
                 <NavLink href="/professores" active={isActive('/professores')} className="text-white hover:text-white/80 border-b-2 border-transparent hover:border-white">PROFESSORES</NavLink>
                 <NavLink href="/turmas" active={isActive('/turmas')} className="text-white hover:text-white/80 border-b-2 border-transparent hover:border-white">TURMAS</NavLink>
                 <NavLink href="/unidades-curriculares" active={isActive('/unidades-curriculares')} className="text-white hover:text-white/80 border-b-2 border-transparent hover:border-white">UNIDADES CURRICULARES</NavLink>
+
+                {/* ⭐ NOVO: LINK DE SALAS */}
+                <NavLink href="/salas" active={isActive('/salas')} className="text-white hover:text-white/80 border-b-2 border-transparent hover:border-white">SALAS</NavLink>
               </div>
             </div>
 
@@ -47,12 +51,15 @@ export default function AuthenticatedLayout({ header, children, bgClass = 'bg-am
           </div>
         </div>
 
-        {/* Mobile menu */}
+        {/* MENU MOBILE */}
         <div className={`${open ? 'block' : 'hidden'} sm:hidden`}>
           <div className="pt-2 pb-3 space-y-1 bg-amber-600/90">
             <ResponsiveNavLink href="/professores" active={isActive('/professores')} className="text-white">Professores</ResponsiveNavLink>
             <ResponsiveNavLink href="/turmas" active={isActive('/turmas')} className="text-white">Turmas</ResponsiveNavLink>
             <ResponsiveNavLink href="/unidades-curriculares" active={isActive('/unidades-curriculares')} className="text-white">Unidades Curriculares</ResponsiveNavLink>
+
+            {/* ⭐ NOVO: SALAS NO MOBILE */}
+            <ResponsiveNavLink href="/salas" active={isActive('/salas')} className="text-white">Salas</ResponsiveNavLink>
           </div>
 
           <div className="border-t border-gray-200 pt-4 pb-1 bg-white">
