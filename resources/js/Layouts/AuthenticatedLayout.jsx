@@ -23,7 +23,8 @@ export default function AuthenticatedLayout({ header, children, bgClass = 'bg-am
                 <NavLink href="/professores" active={isActive('/professores')} className="text-white hover:text-white/80 border-b-2 border-transparent hover:border-white">PROFESSORES</NavLink>
                 <NavLink href="/turmas" active={isActive('/turmas')} className="text-white hover:text-white/80 border-b-2 border-transparent hover:border-white">TURMAS</NavLink>
                 <NavLink href="/unidades-curriculares" active={isActive('/unidades-curriculares')} className="text-white hover:text-white/80 border-b-2 border-transparent hover:border-white">UNIDADES CURRICULARES</NavLink>
-
+                 <NavLink href={route('ensalamento.index')} active={route().current('ensalamento.*')} className="text-white hover:text-white/80 border-b-2 border-transparent hover:border-white"> ENSALAMENTO</NavLink>
+                
                 {/* ⭐ NOVO: LINK DE SALAS */}
                 <NavLink href="/salas" active={isActive('/salas')} className="text-white hover:text-white/80 border-b-2 border-transparent hover:border-white">SALAS</NavLink>
               </div>
