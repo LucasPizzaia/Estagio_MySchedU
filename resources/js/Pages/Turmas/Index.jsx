@@ -46,13 +46,6 @@ export default function Index({ turmas = [], flash }) {
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
-
-          <Link
-            href="/turmas/create"
-            className="rounded-xl bg-amber-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-amber-700 transition text-center"
-          >
-            Nova Turma
-          </Link>
         </div>
       </div>
 
@@ -64,7 +57,7 @@ export default function Index({ turmas = [], flash }) {
       )}
 
       {/* CARD DA TABELA */}
-      <div className="max-w-6xl mx-auto rounded-2xl border border-amber-200 bg-white shadow-lg overflow-hidden">
+      <div className="max-w-6xl mx-auto rounded-2xl border border-amber-200 bg-white shadow-lg overflow-hidden mb-20">
         <div className="overflow-auto" style={{ maxHeight: '65vh' }}>
           <table className="w-full text-left">
             <thead className="sticky top-0 bg-amber-50 border-b border-amber-200">
@@ -82,8 +75,8 @@ export default function Index({ turmas = [], flash }) {
                   {/* Nome + Avatar */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-amber-600/10 text-amber-700 flex items-center justify-center font-bold border border-amber-100">
-                        {(t.nome?.[0] || 'T').toUpperCase()}
+                      <div className="h-10 w-10 rounded-xl bg-amber-600/10 text-amber-700 flex items-center justify-center font-bold border border-amber-200 uppercase">
+                        {(t.nome?.[0] || 'T')}
                       </div>
                       <div className="leading-tight">
                         <div className="font-bold text-gray-900">{t.nome}</div>
@@ -94,7 +87,7 @@ export default function Index({ turmas = [], flash }) {
 
                   {/* Quantidade */}
                   <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center rounded-lg bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-700">
+                    <span className="inline-flex items-center rounded-lg bg-gray-100 px-3 py-1 text-sm font-bold text-gray-700 border border-gray-200">
                       {t.quantidade_alunos}
                     </span>
                   </td>
@@ -147,12 +140,13 @@ export default function Index({ turmas = [], flash }) {
         </div>
       </div>
 
-      {/* Botão Flutuante */}
+      {/* BOTÃO FLUTUANTE CORRIGIDO: FIXO NO CANTO DA TELA */}
       <Link
         href="/turmas/create"
-        className="fixed bottom-8 right-8 inline-flex items-center justify-center rounded-full bg-amber-600 text-white h-14 w-14 shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 active:scale-95"
+        className="fixed bottom-10 right-10 flex items-center justify-center rounded-full bg-amber-600 text-white h-16 w-16 shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 active:scale-95 z-[9999] group"
+        title="Nova Turma"
       >
-        <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+        <svg className="h-8 w-8 transition-transform group-hover:rotate-90" viewBox="0 0 24 24" fill="currentColor">
           <path d="M13 11h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 2 0v6z" />
         </svg>
       </Link>

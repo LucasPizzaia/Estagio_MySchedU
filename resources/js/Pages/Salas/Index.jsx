@@ -61,13 +61,6 @@ export default function Index({ salas = [], flash }) {
             <option value="local">Ordenar: Local</option>
             <option value="quantidade_lugares">Ordenar: Capacidade</option>
           </select>
-
-          <Link
-            href="/salas/create"
-            className="rounded-xl bg-amber-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-amber-700 transition text-center"
-          >
-            Nova Sala
-          </Link>
         </div>
       </div>
 
@@ -79,7 +72,7 @@ export default function Index({ salas = [], flash }) {
       )}
 
       {/* CARD DA TABELA */}
-      <div className="max-w-6xl mx-auto rounded-2xl border border-amber-200 bg-white shadow-lg overflow-hidden">
+      <div className="max-w-6xl mx-auto rounded-2xl border border-amber-200 bg-white shadow-lg overflow-hidden mb-20">
         <div className="overflow-auto" style={{ maxHeight: '65vh' }}>
           <table className="w-full text-left">
             <thead className="sticky top-0 bg-amber-50 border-b border-amber-200">
@@ -97,8 +90,8 @@ export default function Index({ salas = [], flash }) {
                   {/* Nome + Avatar */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-amber-600/10 text-amber-700 flex items-center justify-center font-bold border border-amber-200">
-                        {(sala.nome?.[0] || 'S').toUpperCase()}
+                      <div className="h-10 w-10 rounded-xl bg-amber-600/10 text-amber-700 flex items-center justify-center font-bold border border-amber-200 uppercase">
+                        {(sala.nome?.[0] || 'S')}
                       </div>
                       <div className="leading-tight">
                         <div className="font-bold text-gray-900">{sala.nome}</div>
@@ -152,25 +145,18 @@ export default function Index({ salas = [], flash }) {
                   </td>
                 </tr>
               ))}
-
-              {!list.length && (
-                <tr>
-                  <td colSpan="4" className="px-4 py-16 text-center text-gray-400 italic">
-                    Nenhuma sala cadastrada no sistema.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Botão Flutuante */}
+      {/* BOTÃO FLUTUANTE CORRIGIDO: FIXO NO CANTO DA TELA */}
       <Link
         href="/salas/create"
-        className="fixed bottom-8 right-8 inline-flex items-center justify-center rounded-full bg-amber-600 text-white h-14 w-14 shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 active:scale-95"
+        className="fixed bottom-10 right-10 flex items-center justify-center rounded-full bg-amber-600 text-white h-16 w-16 shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 active:scale-95 z-[9999] group"
+        title="Nova Sala"
       >
-        <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+        <svg className="h-8 w-8 transition-transform group-hover:rotate-90" viewBox="0 0 24 24" fill="currentColor">
           <path d="M13 11h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 2 0v6z" />
         </svg>
       </Link>

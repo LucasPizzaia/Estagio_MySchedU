@@ -62,14 +62,6 @@ export default function Index({ professores = [], flash }) {
             <option value="nome">Ordenar: Nome</option>
             <option value="email">Ordenar: E-mail</option>
           </select>
-
-          {/* BOTÃO NOVO */}
-          <Link
-            href="/professores/create"
-            className="rounded-xl bg-amber-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-amber-700 transition text-center"
-          >
-            Novo Professor
-          </Link>
         </div>
       </div>
 
@@ -81,7 +73,7 @@ export default function Index({ professores = [], flash }) {
       )}
 
       {/* CARD DA TABELA */}
-      <div className="max-w-6xl mx-auto rounded-2xl border border-amber-200 bg-white shadow-lg overflow-hidden">
+      <div className="max-w-6xl mx-auto rounded-2xl border border-amber-200 bg-white shadow-lg overflow-hidden mb-20">
         <div className="overflow-auto" style={{ maxHeight: '65vh' }}>
           <table className="w-full text-left">
             <thead className="sticky top-0 bg-amber-50 border-b border-amber-200">
@@ -96,18 +88,16 @@ export default function Index({ professores = [], flash }) {
             <tbody className="divide-y divide-amber-100">
               {list.map((p, i) => (
                 <tr key={p.id} className="hover:bg-amber-50/50 transition-colors group">
-                  {/* Matrícula Chip */}
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center rounded-lg bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800 border border-amber-200">
                       {p.matricula}
                     </span>
                   </td>
 
-                  {/* Nome + Avatar */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-amber-600/10 text-amber-700 flex items-center justify-center font-bold border border-amber-200">
-                        {(p.nome?.[0] || 'P').toUpperCase()}
+                      <div className="h-10 w-10 rounded-xl bg-amber-600/10 text-amber-700 flex items-center justify-center font-bold border border-amber-200 uppercase">
+                        {(p.nome?.[0] || 'P')}
                       </div>
                       <div className="leading-tight">
                         <div className="font-bold text-gray-900">{p.nome} {p.sobrenome}</div>
@@ -116,18 +106,14 @@ export default function Index({ professores = [], flash }) {
                     </div>
                   </td>
 
-                  {/* Email */}
                   <td className="px-6 py-4 text-sm font-medium">
                     <a className="text-amber-600 hover:text-amber-700 transition decoration-amber-300 underline-offset-4 hover:underline" href={`mailto:${p.email}`}>
                       {p.email}
                     </a>
                   </td>
 
-                  {/* AÇÕES (ÍCONES) */}
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
-                      
-                      {/* Editar */}
                       <Link
                         href={`/professores/${p.id}/edit`}
                         className="p-2 text-amber-600 hover:bg-amber-100 rounded-lg transition"
@@ -138,7 +124,6 @@ export default function Index({ professores = [], flash }) {
                         </svg>
                       </Link>
 
-                      {/* Excluir */}
                       <button
                         onClick={() => del(p.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
@@ -148,30 +133,22 @@ export default function Index({ professores = [], flash }) {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                       </button>
-
                     </div>
                   </td>
                 </tr>
               ))}
-
-              {!list.length && (
-                <tr>
-                  <td colSpan="4" className="px-4 py-16 text-center text-gray-400 italic">
-                    Nenhum professor encontrado com estes termos.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Botão Flutuante Mobile/Acesso Rápido */}
+      {/* BOTÃO FLUTUANTE CORRIGIDO: FIXO NO CANTO DA TELA */}
       <Link
         href="/professores/create"
-        className="fixed bottom-8 right-8 inline-flex items-center justify-center rounded-full bg-amber-600 text-white h-14 w-14 shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 active:scale-95"
+        className="fixed bottom-10 right-10 flex items-center justify-center rounded-full bg-amber-600 text-white h-16 w-16 shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 active:scale-95 z-[9999] group"
+        title="Novo Professor"
       >
-        <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+        <svg className="h-8 w-8 transition-transform group-hover:rotate-90" viewBox="0 0 24 24" fill="currentColor">
           <path d="M13 11h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 2 0v6z" />
         </svg>
       </Link>
