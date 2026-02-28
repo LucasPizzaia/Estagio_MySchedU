@@ -1,10 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 
+// Constantes atualizadas para refletir a abrangência por curso
 const METODOS = [
-  { value: 'teorica', label: 'Teórica' },
-  { value: 'teorico-pratica', label: 'Teórico-prática' },
-  { value: 'pratica', label: 'Prática' },
+  { value: 'Engenharia de Software', label: 'Engenharia de Software' },
+  { value: 'Ciências da Computação', label: 'Ciências da Computação' },
+  { value: 'Ambas', label: 'Ambas (Software e Computação)' },
 ];
 
 const TIPOS = [
@@ -21,7 +22,7 @@ export default function Edit({ uc }) {
     nome: uc.nome ?? '',
     grupo: uc.grupo ?? '',
     carga_horaria: uc.carga_horaria ?? '',
-    metodo: uc.metodo ?? 'teorica',
+    metodo: uc.metodo ?? '', // Valor vindo do banco (agora o nome do curso)
     tipo: uc.tipo ?? 'core',
     descricao: uc.descricao ?? '',
   });
@@ -42,7 +43,7 @@ export default function Edit({ uc }) {
             Editar Unidade Curricular
           </h1>
           <p className="text-gray-500 mt-1 text-sm">
-            Atualize as informações desta UC.
+            Atualize as informações desta UC e sua abrangência acadêmica.
           </p>
         </div>
 
@@ -66,7 +67,7 @@ export default function Edit({ uc }) {
           {/* Nome */}
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Nome <span className="text-amber-600">*</span>
+              Nome da Unidade <span className="text-amber-600">*</span>
             </label>
             <input
               className="w-full rounded-xl border border-amber-300 bg-white px-4 py-2.5 
@@ -82,7 +83,7 @@ export default function Edit({ uc }) {
           {/* Descrição */}
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Descrição
+              Ementa / Descrição
             </label>
             <textarea
               rows="4"
@@ -96,18 +97,25 @@ export default function Edit({ uc }) {
             )}
           </div>
 
-          {/* Grupo */}
+          {/* Curso / Abrangência */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Grupo
+              Curso / Abrangência <span className="text-amber-600">*</span>
             </label>
-            <input
+            <select
               className="w-full rounded-xl border border-amber-300 px-4 py-2.5 shadow-sm focus:ring-amber-500"
-              value={data.grupo}
-              onChange={(e) => setData('grupo', e.target.value)}
-            />
-            {errors.grupo && (
-              <p className="text-red-600 text-sm mt-1">{errors.grupo}</p>
+              value={data.metodo}
+              onChange={(e) => setData('metodo', e.target.value)}
+            >
+              <option value="">Selecione o curso...</option>
+              {METODOS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+            {errors.metodo && (
+              <p className="text-red-600 text-sm mt-1">{errors.metodo}</p>
             )}
           </div>
 
@@ -145,31 +153,25 @@ export default function Edit({ uc }) {
             )}
           </div>
 
-          {/* Método */}
+          {/* Grupo */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Método <span className="text-amber-600">*</span>
+              Grupo / Semestre
             </label>
-            <select
+            <input
               className="w-full rounded-xl border border-amber-300 px-4 py-2.5 shadow-sm focus:ring-amber-500"
-              value={data.metodo}
-              onChange={(e) => setData('metodo', e.target.value)}
-            >
-              {METODOS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
-            {errors.metodo && (
-              <p className="text-red-600 text-sm mt-1">{errors.metodo}</p>
+              value={data.grupo}
+              onChange={(e) => setData('grupo', e.target.value)}
+            />
+            {errors.grupo && (
+              <p className="text-red-600 text-sm mt-1">{errors.grupo}</p>
             )}
           </div>
 
           {/* Tipo */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Tipo <span className="text-amber-600">*</span>
+              Tipo de Oferta <span className="text-amber-600">*</span>
             </label>
             <select
               className="w-full rounded-xl border border-amber-300 px-4 py-2.5 shadow-sm 
