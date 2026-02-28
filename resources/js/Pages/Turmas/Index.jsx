@@ -28,20 +28,25 @@ export default function Index({ turmas = [], flash }) {
     <AuthenticatedLayout header={null} bgClass="bg-white">
       <Head title="Turmas" />
 
-      {/* HEADER PADRONIZADO */}
-      <div className="max-w-6xl mx-auto mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between px-4 sm:px-0">
+      {/* HEADER PADRONIZADO COM FILTRO PREMIUM */}
+      <div className="max-w-6xl mx-auto mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between px-4 sm:px-0">
         <div>
           <h1 className="text-3xl font-bold text-amber-700 tracking-tight">Turmas</h1>
           <p className="text-gray-500 mt-1 text-sm">Gerencie o agrupamento de alunos e períodos de ingresso.</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          {/* BUSCA */}
-          <div className="flex rounded-xl border border-amber-300 bg-white overflow-hidden shadow-sm">
-            <span className="hidden sm:flex items-center px-3 text-sm text-gray-500 font-medium">Buscar</span>
+        {/* BARRA DE BUSCA COM ÍCONE INTEGRADO */}
+        <div className="w-full md:w-96">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg className="h-5 w-5 text-amber-400 group-focus-within:text-amber-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
             <input
-              className="w-full px-3 py-2 text-gray-800 outline-none"
-              placeholder="Nome da turma ou data..."
+              type="text"
+              className="block w-full pl-11 pr-4 py-3 bg-white border border-amber-100 rounded-2xl text-sm placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all outline-none"
+              placeholder="Buscar por nome ou data..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
@@ -51,31 +56,31 @@ export default function Index({ turmas = [], flash }) {
 
       {/* FLASH MESSAGE */}
       {flash && (
-        <div className="max-w-6xl mx-auto mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-amber-800 shadow-sm">
+        <div className="max-w-6xl mx-auto mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-amber-800 shadow-sm font-medium">
           {flash}
         </div>
       )}
 
       {/* CARD DA TABELA */}
-      <div className="max-w-6xl mx-auto rounded-2xl border border-amber-200 bg-white shadow-lg overflow-hidden mb-20">
+      <div className="max-w-6xl mx-auto rounded-3xl border border-amber-100 bg-white shadow-xl overflow-hidden mb-20">
         <div className="overflow-auto" style={{ maxHeight: '65vh' }}>
           <table className="w-full text-left">
-            <thead className="sticky top-0 bg-amber-50 border-b border-amber-200">
-              <tr className="text-gray-700 font-bold text-sm uppercase tracking-wider">
-                <th className="px-6 py-4">Identificação da Turma</th>
-                <th className="px-6 py-4 text-center">Qtd. Alunos</th>
-                <th className="px-6 py-4 text-center">Data de Entrada</th>
-                <th className="px-6 py-4 text-right w-32">Ações</th>
+            <thead className="sticky top-0 bg-amber-50/80 backdrop-blur-md border-b border-amber-100">
+              <tr className="text-gray-700 font-black text-[10px] uppercase tracking-widest">
+                <th className="px-6 py-5">Identificação da Turma</th>
+                <th className="px-6 py-5 text-center">Qtd. Alunos</th>
+                <th className="px-6 py-5 text-center">Data de Entrada</th>
+                <th className="px-6 py-5 text-right w-32">Ações</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-amber-100">
+            <tbody className="divide-y divide-amber-50">
               {list.map((t, i) => (
                 <tr key={t.id} className="hover:bg-amber-50/50 transition-colors group">
                   {/* Nome + Avatar */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-amber-600/10 text-amber-700 flex items-center justify-center font-bold border border-amber-200 uppercase">
+                      <div className="h-10 w-10 rounded-xl bg-amber-600/10 text-amber-700 flex items-center justify-center font-bold border border-amber-100 uppercase">
                         {(t.nome?.[0] || 'T')}
                       </div>
                       <div className="leading-tight">
@@ -87,8 +92,8 @@ export default function Index({ turmas = [], flash }) {
 
                   {/* Quantidade */}
                   <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center rounded-lg bg-gray-100 px-3 py-1 text-sm font-bold text-gray-700 border border-gray-200">
-                      {t.quantidade_alunos}
+                    <span className="inline-flex items-center rounded-lg bg-gray-50 px-3 py-1 text-xs font-bold text-gray-700 border border-gray-100">
+                      {t.quantidade_alunos} <span className="ml-1 text-[9px] text-gray-400 uppercase font-normal">alunos</span>
                     </span>
                   </td>
 
@@ -140,10 +145,10 @@ export default function Index({ turmas = [], flash }) {
         </div>
       </div>
 
-      {/* BOTÃO FLUTUANTE CORRIGIDO: FIXO NO CANTO DA TELA */}
+      {/* BOTÃO FLUTUANTE FIXO NO CANTO DA TELA */}
       <Link
         href="/turmas/create"
-        className="fixed bottom-10 right-10 flex items-center justify-center rounded-full bg-amber-600 text-white h-16 w-16 shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 active:scale-95 z-[9999] group"
+        className="fixed bottom-10 right-10 flex items-center justify-center rounded-full bg-amber-600 text-white h-16 w-16 shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 active:scale-95 z-[9999] group border-4 border-white"
         title="Nova Turma"
       >
         <svg className="h-8 w-8 transition-transform group-hover:rotate-90" viewBox="0 0 24 24" fill="currentColor">

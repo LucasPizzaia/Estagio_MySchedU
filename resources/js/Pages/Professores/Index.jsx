@@ -34,58 +34,72 @@ export default function Index({ professores = [], flash }) {
       <Head title="Professores" />
 
       {/* HEADER PADRONIZADO */}
-      <div className="max-w-6xl mx-auto mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between px-4 sm:px-0">
+      <div className="max-w-6xl mx-auto mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between px-4 sm:px-0">
         <div>
           <h1 className="text-3xl font-bold text-amber-700 tracking-tight">Professores</h1>
           <p className="text-gray-500 mt-1 text-sm">Gerencie o corpo docente e suas informações de contato.</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          {/* BUSCA */}
-          <div className="flex rounded-xl border border-amber-300 bg-white overflow-hidden shadow-sm">
-            <span className="hidden sm:flex items-center px-3 text-sm text-gray-500 font-medium">Buscar</span>
+        {/* BARRA DE FILTROS PREMIUM */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+          
+          {/* BUSCA COM ÍCONE */}
+          <div className="relative w-full sm:w-80 group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg className="h-5 w-5 text-amber-400 group-focus-within:text-amber-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
             <input
-              className="w-full px-3 py-2 text-gray-800 outline-none"
-              placeholder="Nome, matrícula ou e-mail..."
+              type="text"
+              className="block w-full pl-11 pr-4 py-3 bg-white border border-amber-100 rounded-2xl text-sm placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all outline-none"
+              placeholder="Buscar professor..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
 
-          {/* ORDENAR */}
-          <select
-            className="rounded-xl border border-amber-300 bg-white px-3 py-2 text-gray-700 shadow-sm focus:ring-amber-500 outline-none"
-            value={order}
-            onChange={(e) => setOrder(e.target.value)}
-          >
-            <option value="matricula">Ordenar: Matrícula</option>
-            <option value="nome">Ordenar: Nome</option>
-            <option value="email">Ordenar: E-mail</option>
-          </select>
+          {/* ORDENAÇÃO ESTILIZADA */}
+          <div className="relative w-full sm:w-48">
+            <select
+              className="appearance-none block w-full pl-4 pr-10 py-3 bg-white border border-amber-100 rounded-2xl text-sm font-bold text-gray-700 shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all outline-none cursor-pointer"
+              value={order}
+              onChange={(e) => setOrder(e.target.value)}
+            >
+              <option value="matricula">Matrícula</option>
+              <option value="nome">Nome</option>
+              <option value="email">E-mail</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-amber-500">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* FLASH MESSAGE */}
       {flash && (
-        <div className="max-w-6xl mx-auto mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-amber-800 shadow-sm">
+        <div className="max-w-6xl mx-auto mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-amber-800 shadow-sm font-medium">
           {flash}
         </div>
       )}
 
       {/* CARD DA TABELA */}
-      <div className="max-w-6xl mx-auto rounded-2xl border border-amber-200 bg-white shadow-lg overflow-hidden mb-20">
+      <div className="max-w-6xl mx-auto rounded-3xl border border-amber-100 bg-white shadow-xl overflow-hidden mb-20">
         <div className="overflow-auto" style={{ maxHeight: '65vh' }}>
           <table className="w-full text-left">
-            <thead className="sticky top-0 bg-amber-50 border-b border-amber-200">
-              <tr className="text-gray-700 font-bold text-sm uppercase tracking-wider">
-                <th className="px-6 py-4 w-40">Matrícula</th>
-                <th className="px-6 py-4">Professor</th>
-                <th className="px-6 py-4">E-mail</th>
-                <th className="px-6 py-4 text-right w-32">Ações</th>
+            <thead className="sticky top-0 bg-amber-50/80 backdrop-blur-md border-b border-amber-100">
+              <tr className="text-gray-700 font-black text-[10px] uppercase tracking-widest">
+                <th className="px-6 py-5 w-40">Matrícula</th>
+                <th className="px-6 py-5">Professor</th>
+                <th className="px-6 py-5">E-mail</th>
+                <th className="px-6 py-5 text-right w-32">Ações</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-amber-100">
+            <tbody className="divide-y divide-amber-50">
               {list.map((p, i) => (
                 <tr key={p.id} className="hover:bg-amber-50/50 transition-colors group">
                   <td className="px-6 py-4">
@@ -96,7 +110,7 @@ export default function Index({ professores = [], flash }) {
 
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-amber-600/10 text-amber-700 flex items-center justify-center font-bold border border-amber-200 uppercase">
+                      <div className="h-10 w-10 rounded-xl bg-amber-600/10 text-amber-700 flex items-center justify-center font-bold border border-amber-100 uppercase">
                         {(p.nome?.[0] || 'P')}
                       </div>
                       <div className="leading-tight">
@@ -142,10 +156,9 @@ export default function Index({ professores = [], flash }) {
         </div>
       </div>
 
-      {/* BOTÃO FLUTUANTE CORRIGIDO: FIXO NO CANTO DA TELA */}
       <Link
         href="/professores/create"
-        className="fixed bottom-10 right-10 flex items-center justify-center rounded-full bg-amber-600 text-white h-16 w-16 shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 active:scale-95 z-[9999] group"
+        className="fixed bottom-10 right-10 flex items-center justify-center rounded-full bg-amber-600 text-white h-16 w-16 shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 active:scale-95 z-[9999] group border-4 border-white"
         title="Novo Professor"
       >
         <svg className="h-8 w-8 transition-transform group-hover:rotate-90" viewBox="0 0 24 24" fill="currentColor">

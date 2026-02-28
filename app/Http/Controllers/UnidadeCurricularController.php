@@ -23,7 +23,13 @@ class UnidadeCurricularController extends Controller
                     : Rule::unique('unidades_curriculares', 'codigo'),
             ],
             'carga_horaria' => ['required', 'integer', 'min:1', 'max:2000'],
-            'metodo'        => ['required', 'in:teorica,teorico-pratica,pratica'],
+            
+            // CORREÇÃO AQUI: Agora aceita os nomes dos cursos conforme o seu formulário
+            'metodo'        => [
+                'required', 
+                'in:Ciência da Computação,Engenharia de Software,Sistemas de Informação,Ambas'
+            ],
+            
             'tipo'          => ['required', 'in:flex,core,digital'],
         ];
     }
@@ -41,8 +47,8 @@ class UnidadeCurricularController extends Controller
             ->get();
 
         return Inertia::render('UnidadesCurriculares/Index', [
-            'unidades' => $ucs,                 // <- exatamente como a view de UC espera
-            'flash'    => session('success'),   // <- mesmo padrão da tela de Professores
+            'unidades' => $ucs,
+            'flash'    => session('success'),
         ]);
     }
 
@@ -53,6 +59,7 @@ class UnidadeCurricularController extends Controller
 
     public function store(Request $request)
     {
+        // O validate agora usará as novas opções permitidas
         $data = $request->validate($this->rules());
         UnidadeCurricular::create($data);
 
