@@ -59,25 +59,24 @@ class EnsalamentoController extends Controller
         ]);
     }
 
-    /**
-     * ESTE É O MÉTODO QUE SALVA O HORÁRIO CLICADO NA GRADE
-     */
     public function storeHorario(Request $request)
     {
-        // 1. Validação básica de presença dos campos
+        // 1. Validação adaptada para Digital
         $request->validate([
             'grade_id' => 'required|exists:grades,id',
             'professor_id' => 'required|exists:professors,id',
-            'sala_id' => 'required|exists:salas,id',
             'turma_id' => 'required|exists:turmas,id',
             'unidade_curricular_id' => 'required|exists:unidades_curriculares,id',
             'dia_semana' => 'required|string',
             'horario_slot' => 'required|string',
+            'is_digital' => 'boolean',
+            // Sala só é obrigatória se NÃO for digital
+            'sala_id' => $request->is_digital ? 'nullable' : 'required|exists:salas,id',
         ]);
 
         // 2. Validação de Conflitos (Regras de Negócio)
 
-        // Verificação: Professor já está em outra aula nesse horário?
+        // Verificação: Professor (Sempre verifica, digital ou não)
         $conflitoProf = Ensalamento::where('grade_id', $request->grade_id)
             ->where('dia_semana', $request->dia_semana)
             ->where('horario_slot', $request->horario_slot)
@@ -88,18 +87,20 @@ class EnsalamentoController extends Controller
             return back()->withErrors(['professor_id' => 'O professor já possui aula neste horário.']);
         }
 
-        // Verificação: Sala já está ocupada?
-        $conflitoSala = Ensalamento::where('grade_id', $request->grade_id)
-            ->where('dia_semana', $request->dia_semana)
-            ->where('horario_slot', $request->horario_slot)
-            ->where('sala_id', $request->sala_id)
-            ->exists();
+        // Verificação: Sala (SÓ verifica se NÃO for digital)
+        if (!$request->is_digital) {
+            $conflitoSala = Ensalamento::where('grade_id', $request->grade_id)
+                ->where('dia_semana', $request->dia_semana)
+                ->where('horario_slot', $request->horario_slot)
+                ->where('sala_id', $request->sala_id)
+                ->exists();
 
-        if ($conflitoSala) {
-            return back()->withErrors(['sala_id' => 'Esta sala já está ocupada neste horário.']);
+            if ($conflitoSala) {
+                return back()->withErrors(['sala_id' => 'Esta sala já está ocupada neste horário.']);
+            }
         }
 
-        // Verificação: Turma já possui outra aula nesse horário?
+        // Verificação: Turma (Sempre verifica para evitar choque de horários)
         $conflitoTurma = Ensalamento::where('grade_id', $request->grade_id)
             ->where('dia_semana', $request->dia_semana)
             ->where('horario_slot', $request->horario_slot)
@@ -110,8 +111,13 @@ class EnsalamentoController extends Controller
             return back()->withErrors(['turma_id' => 'Esta turma já possui aula neste horário.']);
         }
 
-        // 3. Persistência no Banco
-        Ensalamento::create($request->all());
+        // 3. Persistência no Banco (Limpando a sala se for digital)
+        $data = $request->all();
+        if ($request->is_digital) {
+            $data['sala_id'] = null;
+        }
+
+        Ensalamento::create($data);
 
         return back()->with('flash', 'Horário alocado com sucesso!');
     }
@@ -120,5 +126,14 @@ class EnsalamentoController extends Controller
     {
         $grade->delete();
         return redirect()->route('ensalamento.index')->with('flash', 'Grade excluída com sucesso!');
+    }
+
+    /**
+     * Adicione este método caso precise deletar apenas um horário da grade
+     */
+    public function destroyHorario($id)
+    {
+        Ensalamento::findOrFail($id)->delete();
+        return back()->with('flash', 'Alocação removida!');
     }
 }

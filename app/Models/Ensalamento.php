@@ -8,7 +8,8 @@ class Ensalamento extends Model
 {
 protected $fillable = [
     'grade_id', 'professor_id', 'sala_id', 'turma_id', 
-    'unidade_curricular_id', 'dia_semana', 'horario_slot'
+    'unidade_curricular_id', 'dia_semana', 'horario_slot',
+    'is_digital'
 ];
 
 // Relacionamentos para facilitar a busca de nomes no Frontend
