@@ -24,21 +24,16 @@ class UnidadeCurricularController extends Controller
             ],
             'carga_horaria' => ['required', 'integer', 'min:1', 'max:2000'],
             
-            // CORREÇÃO AQUI: Agora aceita os nomes dos cursos conforme o seu formulário
+            // AJUSTADO: Valores exatos para não dar erro de validação
             'metodo'        => [
                 'required', 
-                'in:Ciência da Computação,Engenharia de Software,Sistemas de Informação,Ambas'
+                'in:Ciências da Computação,Engenharia de Software,Sistemas de Informação,Ambas'
             ],
             
             'tipo'          => ['required', 'in:flex,core,digital'],
         ];
     }
 
-    /**
-     * Listagem no mesmo padrão de Professores:
-     * - retorna array simples (sem paginação)
-     * - busca/ordenação ficam no cliente (Index.jsx)
-     */
     public function index()
     {
         $ucs = UnidadeCurricular::query()
@@ -59,7 +54,6 @@ class UnidadeCurricularController extends Controller
 
     public function store(Request $request)
     {
-        // O validate agora usará as novas opções permitidas
         $data = $request->validate($this->rules());
         UnidadeCurricular::create($data);
 

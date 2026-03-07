@@ -59,6 +59,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // 5. Gestão dos Horários/Alocações (Dentro da grade)
     Route::post('/ensalamento/horario', [EnsalamentoController::class, 'storeHorario'])->name('ensalamento.storeHorario');
+    
+    Route::get('/ensalamento/{grade}/pdf', [EnsalamentoController::class, 'exportarPDF'])->name('ensalamento.pdf');
+    Route::delete('/ensalamento/horario/{id}', [EnsalamentoController::class, 'destroyHorario'])->name('ensalamento.destroyHorario');
 });
 
 require __DIR__.'/auth.php';
