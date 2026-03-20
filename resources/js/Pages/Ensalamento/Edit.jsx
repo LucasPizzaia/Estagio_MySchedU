@@ -269,7 +269,7 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> 
         </AuthenticatedLayout>
     );
 }

@@ -45,7 +45,7 @@ export default function AuthenticatedLayout({ header, children, bgClass = 'bg-am
         </div>
       </nav>
 
-      <main className="mx-auto max-w-7xl py-8 px-4 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-[1700px] py-8 px-4 sm:px-6 lg:px-8">
         <div className="bg-white/95 backdrop-blur-md rounded-[2.5rem] p-8 shadow-2xl shadow-black/10 border border-white/20">
             {children}
         </div>
