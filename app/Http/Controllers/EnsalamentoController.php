@@ -53,7 +53,7 @@ class EnsalamentoController extends Controller
                 'ensalamentos.turma', 
                 'ensalamentos.unidadeCurricular'
             ]),
-            'professores' => Professor::all(),
+            'professores' => Professor::with(['unidadesCurriculares', 'disponibilidades'])->get(),
             'salas' => Sala::all(),
             'turmas' => Turma::all(),
             'ucs' => UnidadeCurricular::all(),
@@ -73,10 +73,31 @@ class EnsalamentoController extends Controller
             'sala_id' => $request->is_digital ? 'nullable' : 'required|exists:salas,id',
         ]);
 
-        // --- LÓGICA DE CONFLITOS (SÓ EXECUTA SE NÃO FOR DIGITAL) ---
+        $professor = Professor::findOrFail($request->professor_id);
+
+        // 1. VALIDAÇÃO DE COMPETÊNCIA (UC)
+        $podeLecionar = $professor->unidadesCurriculares()
+            ->where('unidade_curricular_id', $request->unidade_curricular_id)
+            ->exists();
+
+        if (!$podeLecionar) {
+            return back()->withErrors(['professor_id' => 'O PROFESSOR NÃO ESTÁ HABILITADO PARA ESTA UC.']);
+        }
+
+        // 2. VALIDAÇÃO DE DISPONIBILIDADE E CONFLITOS (Apenas Presencial)
         if (!$request->is_digital) {
             
-            // Professor já está em outra aula presencial?
+            // CORREÇÃO DEFINITIVA: Usando 'weekday' e 'slot' conforme o seu banco de dados
+            $disponivel = $professor->disponibilidades()
+                ->where('weekday', $request->dia_semana)
+                ->where('slot', $request->horario_slot)
+                ->exists();
+
+            if (!$disponivel) {
+                return back()->withErrors(['professor_id' => 'O PROFESSOR NÃO TEM DISPONIBILIDADE NESTE HORÁRIO.']);
+            }
+
+            // Conflito de Professor (já em outra aula na mesma grade)
             $conflitoProf = Ensalamento::where('grade_id', $request->grade_id)
                 ->where('dia_semana', $request->dia_semana)
                 ->where('horario_slot', $request->horario_slot)
@@ -84,10 +105,10 @@ class EnsalamentoController extends Controller
                 ->exists();
 
             if ($conflitoProf) {
-                return back()->withErrors(['professor_id' => 'O professor já possui aula presencial neste horário.']);
+                return back()->withErrors(['professor_id' => 'O PROFESSOR JÁ POSSUI OUTRA AULA NESTE HORÁRIO.']);
             }
 
-            // Sala já está ocupada?
+            // Conflito de Sala
             $conflitoSala = Ensalamento::where('grade_id', $request->grade_id)
                 ->where('dia_semana', $request->dia_semana)
                 ->where('horario_slot', $request->horario_slot)
@@ -95,10 +116,10 @@ class EnsalamentoController extends Controller
                 ->exists();
 
             if ($conflitoSala) {
-                return back()->withErrors(['sala_id' => 'Esta sala já está ocupada neste horário.']);
+                return back()->withErrors(['sala_id' => 'ESTA SALA JÁ ESTÁ OCUPADA NESTE HORÁRIO.']);
             }
 
-            // Turma já possui outra aula presencial?
+            // Conflito de Turma
             $conflitoTurma = Ensalamento::where('grade_id', $request->grade_id)
                 ->where('dia_semana', $request->dia_semana)
                 ->where('horario_slot', $request->horario_slot)
@@ -106,19 +127,17 @@ class EnsalamentoController extends Controller
                 ->exists();
 
             if ($conflitoTurma) {
-                return back()->withErrors(['turma_id' => 'Esta turma já possui aula presencial neste horário.']);
+                return back()->withErrors(['turma_id' => 'ESTA TURMA JÁ POSSUI AULA NESTE HORÁRIO.']);
             }
         }
 
-        // --- SALVAMENTO ---
+        // 3. SALVAMENTO
         $data = $request->all();
         
         if ($request->is_digital) {
             $data['sala_id'] = null;
-            // Para digitais, sempre criamos um novo para permitir múltiplas
             Ensalamento::create($data);
         } else {
-            // Para presenciais, usamos updateOrCreate para evitar duplicatas no mesmo slot físico
             Ensalamento::updateOrCreate(
                 [
                     'grade_id' => $request->grade_id,
