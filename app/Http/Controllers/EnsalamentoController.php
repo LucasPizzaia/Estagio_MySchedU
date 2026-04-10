@@ -74,82 +74,82 @@ class EnsalamentoController extends Controller
         ]);
 
         $professor = Professor::findOrFail($request->professor_id);
+        $uc = UnidadeCurricular::findOrFail($request->unidade_curricular_id);
 
-        // 1. VALIDAÇÃO DE COMPETÊNCIA (UC)
+        // --- 1. VALIDAÇÃO DE COMPETÊNCIA ---
         $podeLecionar = $professor->unidadesCurriculares()
             ->where('unidade_curricular_id', $request->unidade_curricular_id)
             ->exists();
 
         if (!$podeLecionar) {
-            return back()->withErrors(['professor_id' => 'O PROFESSOR NÃO ESTÁ HABILITADO PARA ESTA UC.']);
+            return back()->withErrors(['professor_id' => "O PROFESSOR {$professor->nome} NÃO ESTÁ HABILITADO PARA A UC {$uc->nome}."]);
         }
 
-        // 2. VALIDAÇÃO DE DISPONIBILIDADE E CONFLITOS (Apenas Presencial)
+        // --- 2. VALIDAÇÕES PARA AULAS PRESENCIAIS (Conflitos e Disponibilidade) ---
         if (!$request->is_digital) {
             
-            // CORREÇÃO DEFINITIVA: Usando 'weekday' e 'slot' conforme o seu banco de dados
+            // DISPONIBILIDADE DO PROFESSOR (Banco usa weekday e slot)
             $disponivel = $professor->disponibilidades()
                 ->where('weekday', $request->dia_semana)
                 ->where('slot', $request->horario_slot)
                 ->exists();
 
             if (!$disponivel) {
-                return back()->withErrors(['professor_id' => 'O PROFESSOR NÃO TEM DISPONIBILIDADE NESTE HORÁRIO.']);
+                return back()->withErrors(['professor_id' => "O PROFESSOR NÃO TEM DISPONIBILIDADE CADASTRADA PARA ESTE HORÁRIO."]);
             }
 
-            // Conflito de Professor (já em outra aula na mesma grade)
+            // PROFESSOR JÁ ESTÁ EM OUTRA TURMA NO MESMO HORÁRIO?
             $conflitoProf = Ensalamento::where('grade_id', $request->grade_id)
                 ->where('dia_semana', $request->dia_semana)
                 ->where('horario_slot', $request->horario_slot)
                 ->where('professor_id', $request->professor_id)
+                ->where('turma_id', '!=', $request->turma_id)
                 ->exists();
 
             if ($conflitoProf) {
-                return back()->withErrors(['professor_id' => 'O PROFESSOR JÁ POSSUI OUTRA AULA NESTE HORÁRIO.']);
+                return back()->withErrors(['professor_id' => "ESTE PROFESSOR JÁ ESTÁ ALOCADO EM OUTRA TURMA NESTE MESMO HORÁRIO."]);
             }
 
-            // Conflito de Sala
+            // MATÉRIA JÁ ESTÁ SENDO DADA EM OUTRA TURMA NO MESMO HORÁRIO?
+            $conflitoUC = Ensalamento::where('grade_id', $request->grade_id)
+                ->where('dia_semana', $request->dia_semana)
+                ->where('horario_slot', $request->horario_slot)
+                ->where('unidade_curricular_id', $request->unidade_curricular_id)
+                ->where('turma_id', '!=', $request->turma_id)
+                ->exists();
+
+            if ($conflitoUC) {
+                return back()->withErrors(['unidade_curricular_id' => "ESTA UC JÁ ESTÁ SENDO MINISTRADA EM OUTRA TURMA NESTE HORÁRIO."]);
+            }
+
+            // SALA JÁ ESTÁ OCUPADA?
             $conflitoSala = Ensalamento::where('grade_id', $request->grade_id)
                 ->where('dia_semana', $request->dia_semana)
                 ->where('horario_slot', $request->horario_slot)
                 ->where('sala_id', $request->sala_id)
+                ->where('turma_id', '!=', $request->turma_id)
                 ->exists();
 
             if ($conflitoSala) {
-                return back()->withErrors(['sala_id' => 'ESTA SALA JÁ ESTÁ OCUPADA NESTE HORÁRIO.']);
-            }
-
-            // Conflito de Turma
-            $conflitoTurma = Ensalamento::where('grade_id', $request->grade_id)
-                ->where('dia_semana', $request->dia_semana)
-                ->where('horario_slot', $request->horario_slot)
-                ->where('turma_id', $request->turma_id)
-                ->exists();
-
-            if ($conflitoTurma) {
-                return back()->withErrors(['turma_id' => 'ESTA TURMA JÁ POSSUI AULA NESTE HORÁRIO.']);
+                return back()->withErrors(['sala_id' => "ESTA SALA JÁ ESTÁ OCUPADA POR OUTRA TURMA NESTE HORÁRIO."]);
             }
         }
 
-        // 3. SALVAMENTO
+        // --- 3. SALVAMENTO ---
         $data = $request->all();
-        
-        if ($request->is_digital) {
-            $data['sala_id'] = null;
-            Ensalamento::create($data);
-        } else {
-            Ensalamento::updateOrCreate(
-                [
-                    'grade_id' => $request->grade_id,
-                    'turma_id' => $request->turma_id,
-                    'dia_semana' => $request->dia_semana,
-                    'horario_slot' => $request->horario_slot,
-                ],
-                $data
-            );
-        }
+        if ($request->is_digital) { $data['sala_id'] = null; }
 
-        return back()->with('flash', 'Alocação realizada com sucesso!');
+        Ensalamento::updateOrCreate(
+            [
+                'grade_id' => $request->grade_id,
+                'turma_id' => $request->turma_id,
+                'dia_semana' => $request->dia_semana,
+                'horario_slot' => $request->horario_slot,
+            ],
+            $data
+        );
+
+        return back()->with('flash', 'ALOCAÇÃO REALIZADA COM SUCESSO!');
     }
 
     public function exportarPDF(Grade $grade)

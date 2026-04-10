@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react'; // Adicionado useEffect
 
 const DAYS = [
     { key: 'mon', label: 'Segunda' },
@@ -21,7 +21,8 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
     const [isDigital, setIsDigital] = useState(false);
     const [filtroTurma, setFiltroTurma] = useState(turmas[0]?.id || '');
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    // Adicionado clearErrors aqui
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         grade_id: grade.id,
         professor_id: '',
         sala_id: '',
@@ -31,6 +32,13 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
         horario_slot: '',
         is_digital: false,
     });
+
+    // LIMPEZA AUTOMÁTICA DE ERROS AO TROCAR CAMPOS
+    useEffect(() => {
+        if (Object.keys(errors).length > 0) {
+            clearErrors();
+        }
+    }, [data.professor_id, data.unidade_curricular_id, data.sala_id]);
 
     const formatarCurso = (valor) => {
         const mapa = {
@@ -52,6 +60,7 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
 
     const openAlocacao = (day, slot, digital = false) => {
         setIsDigital(digital);
+        clearErrors(); // Limpa erros ao abrir um novo slot
         setData((old) => ({
             ...old,
             turma_id: filtroTurma,
@@ -92,11 +101,9 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
         <AuthenticatedLayout header={null} bgClass="bg-gray-50">
             <Head title={`Editando: ${grade.nome}`} />
 
-            {/* EXPANSÃO DO CONTAINER */}
             <div className="-mx-4 sm:-mx-6 lg:-mx-12 px-4 sm:px-6 lg:px-12">
                 <div className="w-full max-w-[100%] mx-auto py-6">
 
-                    {/* CABEÇALHO */}
                     <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-[2rem] shadow-sm border border-amber-100">
                         <div className="flex-1">
                             <label className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1 block">Visualizando Turma:</label>
@@ -135,7 +142,6 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                         
                         <div className="lg:col-span-10 space-y-8">
-                            {/* GRADE */}
                             <div className="bg-white rounded-[2rem] shadow-xl border border-amber-50 overflow-hidden">
                                 <div className="overflow-auto" style={{ maxHeight: '75vh' }}>
                                     <table className="w-full border-separate border-spacing-0 table-fixed">
@@ -179,8 +185,7 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
                                     </table>
                                 </div>
                             </div>
-                            
-                            {/* DIGITAIS */}
+
                             <div className="space-y-4 pb-10">
                                 <h2 className="text-xl font-black text-gray-800 uppercase tracking-tighter border-l-8 border-purple-500 pl-5">Atividades Digitais</h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -197,7 +202,6 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
                             </div>
                         </div>
 
-                        {/* PAINEL LATERAL CORRIGIDO E ALINHADO */}
                         <div className="lg:col-span-2">
                             <div className={`sticky top-6 bg-white p-6 rounded-[2rem] shadow-2xl border-t-[10px] ${isDigital ? 'border-purple-500 shadow-purple-200' : 'border-amber-500 shadow-amber-200'} transition-all`}>
                                 <header className="mb-8 text-center">
@@ -208,46 +212,61 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
                                 </header>
 
                                 <form onSubmit={submit} className="space-y-8">
-                                    {/* UNIDADE CURRICULAR */}
                                     <div className="relative h-14">
                                         <label className={`absolute -top-2 left-4 bg-white px-2 text-[9px] font-black uppercase tracking-widest z-20 ${isDigital ? 'text-purple-500' : 'text-amber-600'}`}>
                                             Unidade Curricular
                                         </label>
-                                        <select className="w-full h-full rounded-xl border-2 border-gray-100 bg-gray-50 focus:border-amber-500 focus:ring-0 text-[11px] font-bold px-3 appearance-none" value={data.unidade_curricular_id} onChange={e => setData('unidade_curricular_id', e.target.value)} disabled={!selectedSlot}>
+                                        <select
+                                            className="w-full h-full rounded-xl border-2 border-gray-100 bg-gray-50 focus:border-amber-500 focus:ring-0 text-[11px] font-bold px-3 appearance-none leading-tight"
+                                            value={data.unidade_curricular_id}
+                                            onChange={e => setData('unidade_curricular_id', e.target.value)}
+                                            disabled={!selectedSlot}
+                                        >
                                             <option value="">Selecione a UC...</option>
                                             {ucs.map(u => <option key={u.id} value={u.id}>{u.nome}</option>)}
                                         </select>
                                     </div>
 
-                                    {/* PROFESSOR */}
                                     <div className="relative h-14">
                                         <label className={`absolute -top-2 left-4 bg-white px-2 text-[9px] font-black uppercase tracking-widest z-20 ${isDigital ? 'text-purple-500' : 'text-amber-600'}`}>
                                             Professor
                                         </label>
-                                        <select className="w-full h-full rounded-xl border-2 border-gray-100 bg-gray-50 focus:border-amber-500 focus:ring-0 text-[11px] font-bold px-3 appearance-none" value={data.professor_id} onChange={e => setData('professor_id', e.target.value)} disabled={!selectedSlot}>
+                                        <select
+                                            className="w-full h-full rounded-xl border-2 border-gray-100 bg-gray-50 focus:border-amber-500 focus:ring-0 text-[11px] font-bold px-3 appearance-none leading-tight"
+                                            value={data.professor_id}
+                                            onChange={e => setData('professor_id', e.target.value)}
+                                            disabled={!selectedSlot}
+                                        >
                                             <option value="">Selecione o Professor...</option>
                                             {professores.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
                                         </select>
                                     </div>
 
-                                    {/* SALA */}
                                     {!isDigital && (
                                         <div className="relative h-14">
                                             <label className="absolute -top-2 left-4 bg-white px-2 text-[9px] font-black text-amber-600 uppercase tracking-widest z-20">
                                                 Sala
                                             </label>
-                                            <select className="w-full h-full rounded-xl border-2 border-gray-100 bg-gray-50 focus:border-amber-500 focus:ring-0 text-[11px] font-bold px-3 appearance-none" value={data.sala_id} onChange={e => setData('sala_id', e.target.value)} disabled={!selectedSlot}>
+                                            <select
+                                                className="w-full h-full rounded-xl border-2 border-gray-100 bg-gray-50 focus:border-amber-500 focus:ring-0 text-[11px] font-bold px-3 appearance-none leading-tight"
+                                                value={data.sala_id}
+                                                onChange={e => setData('sala_id', e.target.value)}
+                                                disabled={!selectedSlot}
+                                            >
                                                 <option value="">Selecione a Sala...</option>
                                                 {salas.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
                                             </select>
                                         </div>
                                     )}
 
-                                    <button type="submit" disabled={processing || !selectedSlot} className={`w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95 ${isDigital ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-200' : 'bg-amber-600 hover:bg-amber-700 shadow-amber-200'} text-white disabled:bg-gray-100`}>
+                                    <button
+                                        type="submit"
+                                        disabled={processing || !selectedSlot}
+                                        className={`w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95 ${isDigital ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-200' : 'bg-amber-600 hover:bg-amber-700 shadow-amber-200'} text-white disabled:bg-gray-100`}
+                                    >
                                         {processing ? 'SALVANDO...' : 'CONFIRMAR ALOCAÇÃO'}
                                     </button>
 
-                                    {/* ERRO GLOBAL - Único local de exibição */}
                                     {Object.keys(errors).length > 0 && (
                                         <div className="p-3 bg-red-50 rounded-xl border border-red-100 animate-in fade-in zoom-in duration-300">
                                             <p className="text-[10px] text-red-600 font-black uppercase text-center tracking-widest leading-relaxed">
