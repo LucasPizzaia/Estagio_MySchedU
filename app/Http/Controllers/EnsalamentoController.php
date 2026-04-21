@@ -113,12 +113,17 @@ class EnsalamentoController extends Controller
             }
         }
 
-        // ---------- 3. COERÊNCIA UC ↔ MODALIDADE ----------
-        if ($uc->tipo === 'digital' && !$isDigital) {
-            $avisos[] = "ESTA UC É DIGITAL E DEVERIA ESTAR EM ATIVIDADE DIGITAL.";
+             // ---------- 3. COERÊNCIA UC ↔ MODALIDADE (BLOQUEIA) ----------
+             // Esta é a única regra que impede o salvamento. As demais são avisos.
+             if ($uc->tipo === 'digital' && !$isDigital) {
+             return back()->withErrors(['unidade_curricular_id' =>
+             "ESTA UC É DIGITAL — DEVE SER ALOCADA APENAS EM 'ATIVIDADES DIGITAIS'."
+            ]);
         }
-        if ($uc->tipo !== 'digital' && $isDigital) {
-            $avisos[] = "ESTA UC NÃO É DIGITAL — O ESPERADO É USAR UMA SALA FÍSICA.";
+            if ($uc->tipo !== 'digital' && $isDigital) {
+            return back()->withErrors(['unidade_curricular_id' =>
+            "ESTA UC NÃO É DIGITAL — DEVE SER ALOCADA NA GRADE PRESENCIAL, NÃO EM ATIVIDADE DIGITAL."
+             ]);
         }
 
         // ---------- 4. CONFLITO: PROFESSOR NO MESMO HORÁRIO ----------

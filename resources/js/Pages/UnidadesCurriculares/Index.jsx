@@ -1,10 +1,33 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
-export default function Index({ unidades = [], flash }) {
+export default function Index({ unidades = [], flash = {} }) {
   const [q, setQ] = useState('');
   const [order, setOrder] = useState('codigo');
+
+  // === BANNER FLASH ===
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertData, setAlertData] = useState({ type: null, message: '' });
+
+  useEffect(() => {
+    // Aceita flash como objeto { success, error } ou como string (legado).
+    let type = null;
+    let message = '';
+
+    if (flash && typeof flash === 'object') {
+      if (flash.error)   { type = 'error';   message = flash.error;   }
+      else if (flash.success) { type = 'success'; message = flash.success; }
+    } else if (typeof flash === 'string' && flash) {
+      type = 'success';
+      message = flash;
+    }
+
+    if (message) {
+      setAlertData({ type, message });
+      setAlertOpen(true);
+    }
+  }, [flash]);
 
   const list = useMemo(() => {
     let data = [...unidades];
@@ -14,7 +37,7 @@ export default function Index({ unidades = [], flash }) {
       data = data.filter(u =>
         (u.codigo || '').toLowerCase().includes(s) ||
         (u.nome || '').toLowerCase().includes(s) ||
-        (u.metodo || '').toLowerCase().includes(s) || 
+        (u.metodo || '').toLowerCase().includes(s) ||
         String(u.carga_horaria || '').includes(s)
       );
     }
@@ -25,16 +48,71 @@ export default function Index({ unidades = [], flash }) {
 
   const del = (id) => {
     if (confirm('Deseja realmente excluir esta unidade curricular?')) {
-      router.delete(`/unidades-curriculares/${id}`);
+      router.delete(`/unidades-curriculares/${id}`, { preserveScroll: true });
     }
   };
+
+  const isError = alertData.type === 'error';
 
   return (
     <AuthenticatedLayout header={null} bgClass="bg-white">
       <Head title="Unidades Curriculares" />
 
+      {/* ======= BANNER FLASH ======= */}
+      {alertOpen && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-0 pt-6">
+          <div
+            className={`relative rounded-2xl border-2 p-5 shadow-lg ${
+              isError
+                ? 'bg-red-50 border-red-300'
+                : 'bg-emerald-50 border-emerald-300'
+            }`}
+          >
+            <button
+              type="button"
+              onClick={() => setAlertOpen(false)}
+              className={`absolute top-3 right-3 rounded-full p-1 transition ${
+                isError
+                  ? 'text-red-700 hover:bg-red-100'
+                  : 'text-emerald-700 hover:bg-emerald-100'
+              }`}
+              aria-label="Fechar"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className={`flex items-start gap-3 ${isError ? 'text-red-900' : 'text-emerald-900'}`}>
+              <div className={`mt-0.5 flex-shrink-0 ${isError ? 'text-red-600' : 'text-emerald-600'}`}>
+                {isError ? (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round"
+                      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round"
+                      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+              </div>
+
+              <div className="flex-1 pr-8">
+                <div className="font-black uppercase tracking-wider text-[12px] mb-1">
+                  {isError ? 'Não foi possível excluir' : 'Sucesso'}
+                </div>
+                <div className="text-[13px] font-semibold">
+                  {alertData.message}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* HEADER PADRONIZADO */}
-      <div className="max-w-6xl mx-auto mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between px-4 sm:px-0">
+      <div className="max-w-6xl mx-auto mb-10 mt-6 flex flex-col gap-6 md:flex-row md:items-center md:justify-between px-4 sm:px-0">
         <div>
           <h1 className="text-3xl font-bold text-amber-700 tracking-tight">Unidades Curriculares</h1>
           <p className="text-gray-500 mt-1 text-sm">Gerencie as UCs e sua abrangência entre os cursos de TI.</p>
@@ -60,7 +138,7 @@ export default function Index({ unidades = [], flash }) {
           {/* ORDENAÇÃO */}
           <div className="relative w-full sm:w-48">
             <select
-              className="appearance-none block w-full pl-4 pr-10 py-3 bg-white border border-amber-100 rounded-2xl text-sm font-bold text-gray-700 shadow-sm focus:ring-2 focus:ring-amber-500 transition-all outline-none cursor-pointer"
+              className="appearance-none bg-none block w-full pl-4 pr-10 py-3 bg-white border border-amber-100 rounded-2xl text-sm font-bold text-gray-700 shadow-sm focus:ring-2 focus:ring-amber-500 transition-all outline-none cursor-pointer"
               value={order}
               onChange={(e) => setOrder(e.target.value)}
             >
@@ -81,7 +159,6 @@ export default function Index({ unidades = [], flash }) {
       <div className="max-w-6xl mx-auto rounded-3xl border border-amber-100 bg-white shadow-xl overflow-hidden mb-20">
         <div className="overflow-auto" style={{ maxHeight: '65vh' }}>
           <table className="w-full text-left border-collapse">
-            {/* CORREÇÃO DA SOBREPOSIÇÃO: background sólido e z-index */}
             <thead className="sticky top-0 z-10 bg-[#fffbeb] border-b border-amber-100">
               <tr className="text-gray-700 font-black text-[10px] uppercase tracking-widest">
                 <th className="px-6 py-5">Código</th>
@@ -118,11 +195,10 @@ export default function Index({ unidades = [], flash }) {
                     {u.carga_horaria}h
                   </td>
 
-                  {/* AJUSTE DO CONTEÚDO DA ABRANGÊNCIA */}
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                      u.metodo === 'Ambas' 
-                        ? 'bg-purple-50 text-purple-700 border-purple-100' 
+                      u.metodo === 'Ambas'
+                        ? 'bg-purple-50 text-purple-700 border-purple-100'
                         : 'bg-blue-50 text-blue-700 border-blue-100'
                     }`}>
                       {u.metodo || 'Não definido'}
@@ -167,7 +243,7 @@ export default function Index({ unidades = [], flash }) {
         className="fixed bottom-10 right-10 flex items-center justify-center rounded-full bg-amber-600 text-white h-16 w-16 shadow-2xl hover:bg-amber-700 transition-all hover:scale-110 active:scale-95 z-[9999] group border-4 border-white"
       >
         <svg className="h-8 w-8 transition-transform group-hover:rotate-90" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M13 11h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 2 0v6z" />
+          <path d="M13 11h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 0-2h6V5a1 1 0 1 1 2 0v6z" />
         </svg>
       </Link>
     </AuthenticatedLayout>

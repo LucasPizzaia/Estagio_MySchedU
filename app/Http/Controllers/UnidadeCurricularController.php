@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ensalamento;
 use App\Models\UnidadeCurricular;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -23,13 +24,10 @@ class UnidadeCurricularController extends Controller
                     : Rule::unique('unidades_curriculares', 'codigo'),
             ],
             'carga_horaria' => ['required', 'integer', 'min:1', 'max:2000'],
-            
-            // AJUSTADO: Valores exatos para não dar erro de validação
             'metodo'        => [
-                'required', 
-                'in:Ciências da Computação,Engenharia de Software,Sistemas de Informação,Ambas'
+                'required',
+                'in:Ciências da Computação,Engenharia de Software,Sistemas de Informação,Ambas',
             ],
-            
             'tipo'          => ['required', 'in:flex,core,digital'],
         ];
     }
@@ -43,7 +41,10 @@ class UnidadeCurricularController extends Controller
 
         return Inertia::render('UnidadesCurriculares/Index', [
             'unidades' => $ucs,
-            'flash'    => session('success'),
+            'flash'    => [
+                'success' => session('success'),
+                'error'   => session('error'),
+            ],
         ]);
     }
 
@@ -81,6 +82,21 @@ class UnidadeCurricularController extends Controller
 
     public function destroy(UnidadeCurricular $unidadeCurricular)
     {
+        // Bloqueio: UC em uso em ensalamentos não pode ser excluída.
+        $emUso = Ensalamento::where('unidade_curricular_id', $unidadeCurricular->id)->count();
+
+        if ($emUso > 0) {
+            return back()->with(
+                'error',
+                "Não é possível excluir a UC \"{$unidadeCurricular->nome}\": ela está alocada em {$emUso} ensalamento(s). Remova as alocações antes."
+            );
+        }
+
+        // Desvincula dos professores (pivot) antes de excluir
+        if (method_exists($unidadeCurricular, 'professores')) {
+            $unidadeCurricular->professores()->detach();
+        }
+
         $unidadeCurricular->delete();
 
         return back()->with('success', 'Unidade Curricular excluída com sucesso!');
