@@ -6,13 +6,28 @@ use Illuminate\Database\Eloquent\Model;
 
 class Professor extends Model
 {
-    protected $fillable = ['matricula', 'nome', 'sobrenome', 'email'];
+    protected $fillable = [
+        'matricula',
+        'nome',
+        'sobrenome',
+        'email',
+        'availability',
+    ];
 
-   public function disponibilidades() {
-    return $this->hasMany(\App\Models\ProfessorDisponibilidade::class);
-}
-public function unidadesCurriculares() {
-    return $this->belongsToMany(\App\Models\UnidadeCurricular::class, 'professor_unidade_curricular')
-                ->withTimestamps();
-}
+    protected $casts = [
+        'availability' => 'array',
+    ];
+
+    public function disponibilidades()
+    {
+        return $this->hasMany(\App\Models\ProfessorDisponibilidade::class);
+    }
+
+    public function unidadesCurriculares()
+    {
+        return $this->belongsToMany(
+            \App\Models\UnidadeCurricular::class,
+            'professor_unidade_curricular'
+        )->withTimestamps();
+    }
 }

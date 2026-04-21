@@ -18,7 +18,7 @@ class EnsalamentoController extends Controller
     {
         return Inertia::render('Ensalamento/Index', [
             'grades' => Grade::withCount('ensalamentos')->get(),
-            'flash' => session('flash')
+            'flash'  => session('flash'),
         ]);
     }
 
@@ -30,120 +30,188 @@ class EnsalamentoController extends Controller
     public function storeGrade(Request $request)
     {
         $request->validate([
-            'nome' => 'required|string|max:255',
+            'nome'    => 'required|string|max:255',
             'periodo' => 'nullable|string|max:50',
         ]);
 
         $grade = Grade::create([
-            'nome' => $request->nome,
+            'nome'    => $request->nome,
             'periodo' => $request->periodo,
-            'status' => true,
+            'status'  => true,
         ]);
 
         return redirect()->route('ensalamento.edit', $grade->id)
-                         ->with('flash', 'Grade criada com sucesso!');
+            ->with('flash', 'Grade criada com sucesso!');
     }
 
     public function edit(Grade $grade)
     {
         return Inertia::render('Ensalamento/Edit', [
             'grade' => $grade->load([
-                'ensalamentos.professor', 
-                'ensalamentos.sala', 
-                'ensalamentos.turma', 
-                'ensalamentos.unidadeCurricular'
+                'ensalamentos.professor',
+                'ensalamentos.sala',
+                'ensalamentos.turma',
+                'ensalamentos.unidadeCurricular',
             ]),
-            'professores' => Professor::with(['unidadesCurriculares', 'disponibilidades'])->get(),
-            'salas' => Sala::all(),
-            'turmas' => Turma::all(),
-            'ucs' => UnidadeCurricular::all(),
+            'professores' => Professor::with(['unidadesCurriculares'])->get(),
+            'salas'       => Sala::all(),
+            'turmas'      => Turma::all(),
+            'ucs'         => UnidadeCurricular::all(),
         ]);
     }
 
     public function storeHorario(Request $request)
     {
         $request->validate([
-            'grade_id' => 'required|exists:grades,id',
-            'professor_id' => 'required|exists:professors,id',
-            'turma_id' => 'required|exists:turmas,id',
+            'grade_id'              => 'required|exists:grades,id',
+            'professor_id'          => 'required|exists:professors,id',
+            'turma_id'              => 'required|exists:turmas,id',
             'unidade_curricular_id' => 'required|exists:unidades_curriculares,id',
-            'dia_semana' => 'required|string',
-            'horario_slot' => 'required|string',
-            'is_digital' => 'boolean',
-            'sala_id' => $request->is_digital ? 'nullable' : 'required|exists:salas,id',
+            'dia_semana'            => 'required|string',
+            'horario_slot'          => 'required|string',
+            'is_digital'            => 'boolean',
+            'sala_id'               => $request->is_digital ? 'nullable' : 'required|exists:salas,id',
         ]);
 
         $professor = Professor::findOrFail($request->professor_id);
-        $uc = UnidadeCurricular::findOrFail($request->unidade_curricular_id);
+        $uc        = UnidadeCurricular::findOrFail($request->unidade_curricular_id);
+        $turma     = Turma::findOrFail($request->turma_id);
+        $isDigital = (bool) $request->is_digital;
 
-        // --- 1. VALIDAÇÃO DE COMPETÊNCIA ---
+        // ---------- 1. COMPETÊNCIA: professor habilitado na UC ----------
         $podeLecionar = $professor->unidadesCurriculares()
-            ->where('unidade_curricular_id', $request->unidade_curricular_id)
+            ->where('unidade_curricular_id', $uc->id)
             ->exists();
 
         if (!$podeLecionar) {
-            return back()->withErrors(['professor_id' => "O PROFESSOR {$professor->nome} NÃO ESTÁ HABILITADO PARA A UC {$uc->nome}."]);
+            return back()->withErrors(['professor_id' =>
+                "O PROFESSOR NÃO ESTÁ HABILITADO PARA ESTA UNIDADE CURRICULAR."
+            ]);
         }
 
-        // --- 2. VALIDAÇÕES PARA AULAS PRESENCIAIS (Conflitos e Disponibilidade) ---
-        if (!$request->is_digital) {
-            
-            // DISPONIBILIDADE DO PROFESSOR (Banco usa weekday e slot)
-            $disponivel = $professor->disponibilidades()
-                ->where('weekday', $request->dia_semana)
-                ->where('slot', $request->horario_slot)
-                ->exists();
+        // ---------- 2. DISPONIBILIDADE DO PROFESSOR ----------
+        $availability = $professor->availability ?? [];
+        if (!is_array($availability)) {
+            $availability = json_decode($availability, true) ?: [];
+        }
+
+        $diaReq  = strtolower(trim($request->dia_semana));
+        $slotReq = strtolower(trim($request->horario_slot));
+
+        // Atividade digital não precisa casar com grade semanal.
+        $ignorarDisponibilidade = ($diaReq === 'digital' || $slotReq === 'digital');
+
+        if (!$ignorarDisponibilidade) {
+            $disponivel = collect($availability)->contains(fn ($item) =>
+                strtolower(trim($item['weekday'] ?? '')) === $diaReq &&
+                strtolower(trim($item['slot']    ?? '')) === $slotReq
+            );
 
             if (!$disponivel) {
-                return back()->withErrors(['professor_id' => "O PROFESSOR NÃO TEM DISPONIBILIDADE CADASTRADA PARA ESTE HORÁRIO."]);
+                return back()->withErrors(['professor_id' =>
+                    "O PROFESSOR NÃO TEM DISPONIBILIDADE CADASTRADA PARA ESTE HORÁRIO."
+                ]);
             }
+        }
 
-            // PROFESSOR JÁ ESTÁ EM OUTRA TURMA NO MESMO HORÁRIO?
+        // ---------- 3. COERÊNCIA UC ↔ MODALIDADE ----------
+        if ($uc->tipo === 'digital' && !$isDigital) {
+            return back()->withErrors(['unidade_curricular_id' =>
+                "ESTA UC É DIGITAL E DEVE SER ALOCADA EM ATIVIDADE DIGITAL."
+            ]);
+        }
+        if ($uc->tipo !== 'digital' && $isDigital) {
+            return back()->withErrors(['unidade_curricular_id' =>
+                "ESTA UC NÃO É DIGITAL — SELECIONE UMA SALA FÍSICA."
+            ]);
+        }
+
+        // ---------- 4. CONFLITO: PROFESSOR NO MESMO HORÁRIO ----------
+        if (!$ignorarDisponibilidade) {
             $conflitoProf = Ensalamento::where('grade_id', $request->grade_id)
                 ->where('dia_semana', $request->dia_semana)
                 ->where('horario_slot', $request->horario_slot)
-                ->where('professor_id', $request->professor_id)
-                ->where('turma_id', '!=', $request->turma_id)
+                ->where('professor_id', $professor->id)
+                ->where('turma_id', '!=', $turma->id)
                 ->exists();
 
             if ($conflitoProf) {
-                return back()->withErrors(['professor_id' => "ESTE PROFESSOR JÁ ESTÁ ALOCADO EM OUTRA TURMA NESTE MESMO HORÁRIO."]);
-            }
-
-            // MATÉRIA JÁ ESTÁ SENDO DADA EM OUTRA TURMA NO MESMO HORÁRIO?
-            $conflitoUC = Ensalamento::where('grade_id', $request->grade_id)
-                ->where('dia_semana', $request->dia_semana)
-                ->where('horario_slot', $request->horario_slot)
-                ->where('unidade_curricular_id', $request->unidade_curricular_id)
-                ->where('turma_id', '!=', $request->turma_id)
-                ->exists();
-
-            if ($conflitoUC) {
-                return back()->withErrors(['unidade_curricular_id' => "ESTA UC JÁ ESTÁ SENDO MINISTRADA EM OUTRA TURMA NESTE HORÁRIO."]);
-            }
-
-            // SALA JÁ ESTÁ OCUPADA?
-            $conflitoSala = Ensalamento::where('grade_id', $request->grade_id)
-                ->where('dia_semana', $request->dia_semana)
-                ->where('horario_slot', $request->horario_slot)
-                ->where('sala_id', $request->sala_id)
-                ->where('turma_id', '!=', $request->turma_id)
-                ->exists();
-
-            if ($conflitoSala) {
-                return back()->withErrors(['sala_id' => "ESTA SALA JÁ ESTÁ OCUPADA POR OUTRA TURMA NESTE HORÁRIO."]);
+                return back()->withErrors(['professor_id' =>
+                    "ESTE PROFESSOR JÁ ESTÁ ALOCADO EM OUTRA TURMA NESTE HORÁRIO."
+                ]);
             }
         }
 
-        // --- 3. SALVAMENTO ---
+        // ---------- 5. CONFLITO: TURMA JÁ OCUPADA NESSE SLOT COM OUTRA UC ----------
+        if (!$ignorarDisponibilidade) {
+            $conflitoTurma = Ensalamento::where('grade_id', $request->grade_id)
+                ->where('dia_semana', $request->dia_semana)
+                ->where('horario_slot', $request->horario_slot)
+                ->where('turma_id', $turma->id)
+                ->where('unidade_curricular_id', '!=', $uc->id)
+                ->exists();
+
+            if ($conflitoTurma) {
+                return back()->withErrors(['turma_id' =>
+                    "ESTA TURMA JÁ POSSUI OUTRA UC ALOCADA NESTE HORÁRIO."
+                ]);
+            }
+        }
+
+        // ---------- 6. UC DUPLICADA NA MESMA TURMA/GRADE ----------
+        // Impede a mesma UC aparecer mais de uma vez para a mesma turma na grade
+        // (em dia/slot distinto). Se quiser permitir múltiplas ocorrências
+        // pela carga horária, remova ou ajuste esta regra.
+        $ucDuplicada = Ensalamento::where('grade_id', $request->grade_id)
+            ->where('turma_id', $turma->id)
+            ->where('unidade_curricular_id', $uc->id)
+            ->where(function ($q) use ($request) {
+                $q->where('dia_semana', '!=', $request->dia_semana)
+                  ->orWhere('horario_slot', '!=', $request->horario_slot);
+            })
+            ->exists();
+
+        if ($ucDuplicada) {
+            return back()->withErrors(['unidade_curricular_id' =>
+                "ESTA UC JÁ ESTÁ ALOCADA PARA ESTA TURMA EM OUTRO HORÁRIO DESTA GRADE."
+            ]);
+        }
+
+        // ---------- 7. CONFLITO DE SALA / CAPACIDADE ----------
+        if (!$isDigital) {
+            $sala = Sala::findOrFail($request->sala_id);
+
+            $conflitoSala = Ensalamento::where('grade_id', $request->grade_id)
+                ->where('dia_semana', $request->dia_semana)
+                ->where('horario_slot', $request->horario_slot)
+                ->where('sala_id', $sala->id)
+                ->where('turma_id', '!=', $turma->id)
+                ->exists();
+
+            if ($conflitoSala) {
+                return back()->withErrors(['sala_id' =>
+                    "ESTA SALA JÁ ESTÁ OCUPADA POR OUTRA TURMA NESTE HORÁRIO."
+                ]);
+            }
+
+            if ((int) $turma->quantidade_alunos > (int) $sala->quantidade_lugares) {
+                return back()->withErrors(['sala_id' =>
+                    "A SALA {$sala->nome} TEM {$sala->quantidade_lugares} LUGARES E A TURMA POSSUI {$turma->quantidade_alunos} ALUNOS."
+                ]);
+            }
+        }
+
+        // ---------- 8. SALVAMENTO ----------
         $data = $request->all();
-        if ($request->is_digital) { $data['sala_id'] = null; }
+        if ($isDigital) {
+            $data['sala_id'] = null;
+        }
 
         Ensalamento::updateOrCreate(
             [
-                'grade_id' => $request->grade_id,
-                'turma_id' => $request->turma_id,
-                'dia_semana' => $request->dia_semana,
+                'grade_id'     => $request->grade_id,
+                'turma_id'     => $request->turma_id,
+                'dia_semana'   => $request->dia_semana,
                 'horario_slot' => $request->horario_slot,
             ],
             $data
@@ -155,27 +223,26 @@ class EnsalamentoController extends Controller
     public function exportarPDF(Grade $grade)
     {
         $grade->load([
-            'ensalamentos.professor', 
-            'ensalamentos.sala', 
-            'ensalamentos.turma', 
-            'ensalamentos.unidadeCurricular'
+            'ensalamentos.professor',
+            'ensalamentos.sala',
+            'ensalamentos.turma',
+            'ensalamentos.unidadeCurricular',
         ]);
 
         $turmasIds = $grade->ensalamentos->pluck('turma_id')->unique();
         $turmas = Turma::whereIn('id', $turmasIds)->get();
 
         $dias = [
-            'mon' => 'Segunda', 'tue' => 'Terça', 'wed' => 'Quarta', 
-            'thu' => 'Quinta', 'fri' => 'Sexta', 'sat' => 'Sábado'
+            'mon' => 'Segunda', 'tue' => 'Terça', 'wed' => 'Quarta',
+            'thu' => 'Quinta',  'fri' => 'Sexta', 'sat' => 'Sábado',
         ];
-        
         $slots = [
-            's1' => '19:00 - 20:30', 
-            's2' => '20:45 - 22:10'
+            's1' => '19:00 - 20:30',
+            's2' => '20:45 - 22:10',
         ];
 
         $pdf = Pdf::loadView('pdf.grade', compact('grade', 'dias', 'slots', 'turmas'))
-                  ->setPaper('a4', 'landscape'); 
+            ->setPaper('a4', 'landscape');
 
         return $pdf->stream("Grade_{$grade->nome}.pdf");
     }
@@ -183,12 +250,15 @@ class EnsalamentoController extends Controller
     public function destroy(Grade $grade)
     {
         $grade->delete();
-        return redirect()->route('ensalamento.index')->with('flash', 'Grade excluída com sucesso!');
+
+        return redirect()->route('ensalamento.index')
+            ->with('flash', 'Grade excluída com sucesso!');
     }
 
     public function destroyHorario($id)
     {
         Ensalamento::findOrFail($id)->delete();
+
         return back()->with('flash', 'Alocação removida!');
     }
 }

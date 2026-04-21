@@ -16,89 +16,125 @@ class ProfessorController extends Controller
 
         return Inertia::render('Professores/Index', [
             'professores' => $professores,
-            'flash' => session('success')
+            'flash'       => session('success'),
         ]);
     }
 
     public function create()
     {
         return Inertia::render('Professores/Create', [
-            'ucs' => UnidadeCurricular::select('id', 'codigo', 'nome')->orderBy('codigo')->get(),
+            'ucs' => UnidadeCurricular::select('id', 'codigo', 'nome')
+                ->orderBy('codigo')->get(),
         ]);
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'matricula' => 'required|string|max:50|unique:professors,matricula',
-            'nome' => 'required|string|max:255',
-            'sobrenome' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:professors,email',
-            'ucs' => ['array'],
-            'ucs.*' => ['integer', 'exists:unidades_curriculares,id'],
-            'availability' => ['array'],
+            'matricula'      => 'required|string|max:50|unique:professors,matricula',
+            'nome'           => 'required|string|max:255',
+            'sobrenome'      => 'required|string|max:255',
+            'email'          => 'required|email|max:255|unique:professors,email',
+            'ucs'            => ['array'],
+            'ucs.*'          => ['integer', 'exists:unidades_curriculares,id'],
+            'availability'   => ['array'],
+            'availability.*' => ['array'], // cada dia é um array de slots
         ]);
 
         $prof = Professor::create(Arr::except($data, ['ucs', 'availability']));
-
         $prof->unidadesCurriculares()->sync($data['ucs'] ?? []);
 
-        $prof->availability = json_encode($data['availability']); 
+        $prof->availability = $this->normalizarAvailability($data['availability'] ?? []);
         $prof->save();
 
-        return redirect()->route('professores.index')->with('success', 'Professor criado com sucesso.');
+        return redirect()->route('professores.index')
+            ->with('success', 'Professor criado com sucesso.');
     }
 
     public function edit(Professor $professor)
     {
-        $availability = json_decode($professor->availability, true); 
+        // Com o cast 'array', $professor->availability já é array.
+        $availability = is_array($professor->availability) ? $professor->availability : [];
+
+        // Transforma [{weekday:'mon', slot:'s1'}, ...] em { mon:['s1'], tue:[], ... }
+        // para o formato que o Edit.jsx espera.
+        $disp = [];
+        foreach ($availability as $item) {
+            $d = strtolower(trim($item['weekday'] ?? ''));
+            $s = strtolower(trim($item['slot'] ?? ''));
+            if ($d === '' || $s === '') continue;
+            $disp[$d] = $disp[$d] ?? [];
+            if (!in_array($s, $disp[$d], true)) {
+                $disp[$d][] = $s;
+            }
+        }
 
         return Inertia::render('Professores/Edit', [
             'professor' => $professor,
-            'ucs' => UnidadeCurricular::select('id', 'codigo', 'nome')->orderBy('codigo')->get(),
-            'ucs_ids' => $professor->unidadesCurriculares()->pluck('unidade_curricular_id'),
-            'disp' => $availability,  
+            'ucs'       => UnidadeCurricular::select('id', 'codigo', 'nome')
+                ->orderBy('codigo')->get(),
+            'ucs_ids'   => $professor->unidadesCurriculares()->pluck('unidade_curricular_id'),
+            'disp'      => $disp,
         ]);
     }
 
     public function show(Professor $professor)
-{
-    $availability = json_decode($professor->availability, true);
+    {
+        $availability = is_array($professor->availability) ? $professor->availability : [];
 
-    return Inertia::render('Professores/Show', [
-        'professor' => $professor,
-        'ucs' => $professor->unidadesCurriculares,  
-        'availability' => $availability,
-    ]);
-}
-
+        return Inertia::render('Professores/Show', [
+            'professor'    => $professor,
+            'ucs'          => $professor->unidadesCurriculares,
+            'availability' => $availability,
+        ]);
+    }
 
     public function update(Request $request, Professor $professor)
     {
         $data = $request->validate([
-            'matricula' => 'required|string|max:50|unique:professors,matricula,' . $professor->id,
-            'nome' => 'required|string|max:255',
-            'sobrenome' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:professors,email,' . $professor->id,
-            'ucs' => ['array'],
-            'ucs.*' => ['integer', 'exists:unidades_curriculares,id'],
-            'availability' => ['array'],
+            'matricula'      => 'required|string|max:50|unique:professors,matricula,' . $professor->id,
+            'nome'           => 'required|string|max:255',
+            'sobrenome'      => 'required|string|max:255',
+            'email'          => 'required|email|max:255|unique:professors,email,' . $professor->id,
+            'ucs'            => ['array'],
+            'ucs.*'          => ['integer', 'exists:unidades_curriculares,id'],
+            'availability'   => ['array'],
+            'availability.*' => ['array'],
         ]);
 
         $professor->update(Arr::except($data, ['ucs', 'availability']));
-
         $professor->unidadesCurriculares()->sync($data['ucs'] ?? []);
 
-        
-        $professor->availability = json_encode($data['availability']);
+        $professor->availability = $this->normalizarAvailability($data['availability'] ?? []);
         $professor->save();
 
-        return redirect()->route('professores.index')->with('success', 'Professor atualizado com sucesso.');
+        return redirect()->route('professores.index')
+            ->with('success', 'Professor atualizado com sucesso.');
     }
 
     public function destroy(Professor $professor)
     {
         $professor->delete();
-        return redirect()->route('professores.index')->with('success', 'Professor excluído com sucesso.');
+
+        return redirect()->route('professores.index')
+            ->with('success', 'Professor excluído com sucesso.');
+    }
+
+    /**
+     * Converte { mon: ['s1','s2'], tue: [], ... }
+     * em       [ {weekday:'mon', slot:'s1'}, {weekday:'mon', slot:'s2'}, ... ]
+     */
+    private function normalizarAvailability(array $input): array
+    {
+        $out = [];
+        foreach ($input as $weekday => $slots) {
+            foreach ((array) $slots as $slot) {
+                $out[] = [
+                    'weekday' => strtolower(trim((string) $weekday)),
+                    'slot'    => strtolower(trim((string) $slot)),
+                ];
+            }
+        }
+        return $out;
     }
 }
