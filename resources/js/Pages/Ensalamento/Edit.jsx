@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import { useMemo, useState, useEffect } from 'react'; // Adicionado useEffect
+import { useMemo, useState, useEffect } from 'react';
 
 const DAYS = [
     { key: 'mon', label: 'Segunda' },
@@ -16,12 +16,23 @@ const SLOTS = [
     { key: 's2', label: '20:45 - 22:10' },
 ];
 
-export default function Edit({ grade, professores, salas, turmas, ucs }) {
+export default function Edit({ grade, professores, salas, turmas, ucs, flash, avisos = [] }) {
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [isDigital, setIsDigital] = useState(false);
     const [filtroTurma, setFiltroTurma] = useState(turmas[0]?.id || '');
 
-    // Adicionado clearErrors aqui
+    // === BANNER DE AVISOS ===
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertData, setAlertData] = useState({ flash: null, avisos: [] });
+
+    useEffect(() => {
+        const temAvisos = Array.isArray(avisos) && avisos.length > 0;
+        if (flash || temAvisos) {
+            setAlertData({ flash: flash || null, avisos: avisos || [] });
+            setAlertOpen(true);
+        }
+    }, [flash, avisos]);
+
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         grade_id: grade.id,
         professor_id: '',
@@ -33,7 +44,6 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
         is_digital: false,
     });
 
-    // LIMPEZA AUTOMÁTICA DE ERROS AO TROCAR CAMPOS
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
             clearErrors();
@@ -60,7 +70,7 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
 
     const openAlocacao = (day, slot, digital = false) => {
         setIsDigital(digital);
-        clearErrors(); // Limpa erros ao abrir um novo slot
+        clearErrors();
         setData((old) => ({
             ...old,
             turma_id: filtroTurma,
@@ -97,9 +107,72 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
         return ensalamentosFiltrados.filter(e => e.dia_semana === day && e.horario_slot === slot && !e.is_digital);
     };
 
+    const temAvisos = alertData.avisos && alertData.avisos.length > 0;
+
     return (
         <AuthenticatedLayout header={null} bgClass="bg-gray-50">
             <Head title={`Editando: ${grade.nome}`} />
+
+            {/* ======= BANNER DE FLASH / AVISOS ======= */}
+            {alertOpen && (
+                <div className="px-4 sm:px-6 lg:px-12 pt-6">
+                    <div
+                        className={`relative rounded-2xl border-2 p-5 shadow-lg ${
+                            temAvisos
+                                ? 'bg-amber-50 border-amber-300'
+                                : 'bg-emerald-50 border-emerald-300'
+                        }`}
+                    >
+                        <button
+                            type="button"
+                            onClick={() => setAlertOpen(false)}
+                            className={`absolute top-3 right-3 rounded-full p-1 transition ${
+                                temAvisos
+                                    ? 'text-amber-700 hover:bg-amber-100'
+                                    : 'text-emerald-700 hover:bg-emerald-100'
+                            }`}
+                            aria-label="Fechar"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <div className={`flex items-start gap-3 ${temAvisos ? 'text-amber-900' : 'text-emerald-900'}`}>
+                            <div className={`mt-0.5 flex-shrink-0 ${temAvisos ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                {temAvisos ? (
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round"
+                                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round"
+                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                )}
+                            </div>
+
+                            <div className="flex-1 pr-8">
+                                <div className="font-black uppercase tracking-wider text-[12px]">
+                                    {alertData.flash || (temAvisos ? 'Alocação salva com avisos.' : 'Sucesso!')}
+                                </div>
+
+                                {temAvisos && (
+                                    <ul className="mt-3 space-y-1.5 text-[13px] font-semibold">
+                                        {alertData.avisos.map((aviso, idx) => (
+                                            <li key={idx} className="flex items-start gap-2">
+                                                <span className="mt-1.5 inline-block w-1.5 h-1.5 rounded-full bg-amber-600 flex-shrink-0" />
+                                                <span>{aviso}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="-mx-4 sm:-mx-6 lg:-mx-12 px-4 sm:px-6 lg:px-12">
                 <div className="w-full max-w-[100%] mx-auto py-6">
@@ -108,14 +181,14 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
                         <div className="flex-1">
                             <label className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1 block">Visualizando Turma:</label>
                             <div className="relative inline-flex items-center">
-                                <select
-                                    value={filtroTurma}
+                               <select
+                                  value={filtroTurma}
                                     onChange={(e) => {
-                                        setFiltroTurma(e.target.value);
-                                        setData('turma_id', e.target.value);
-                                    }}
-                                    className="appearance-none bg-transparent border-none text-2xl font-black text-gray-800 focus:ring-0 p-0 pr-10 cursor-pointer hover:text-amber-600 transition-colors z-10"
-                                >
+                                     setFiltroTurma(e.target.value);
+                                      setData('turma_id', e.target.value);
+                                     }}
+                                       className="appearance-none bg-transparent bg-none border-none text-2xl font-black text-gray-800 focus:ring-0 p-0 pr-10 cursor-pointer hover:text-amber-600 transition-colors z-10"
+>
                                     {turmas.map(t => (
                                         <option key={t.id} value={t.id} className="text-lg font-bold">{t.nome}</option>
                                     ))}
@@ -140,7 +213,7 @@ export default function Edit({ grade, professores, salas, turmas, ucs }) {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                        
+
                         <div className="lg:col-span-10 space-y-8">
                             <div className="bg-white rounded-[2rem] shadow-xl border border-amber-50 overflow-hidden">
                                 <div className="overflow-auto" style={{ maxHeight: '75vh' }}>
