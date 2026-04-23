@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Turma;
+use App\Models\Ensalamento;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -10,11 +11,14 @@ class TurmaController extends Controller
 {
     public function index()
     {
-        // Alterado para ordenar pela 'nome' da turma, mas pode continuar com 'data_entrada' ou outro critério
-        $turmas = Turma::orderBy('nome')->get();  
+        $turmas = Turma::orderBy('nome')->get();
+
         return Inertia::render('Turmas/Index', [
             'turmas' => $turmas,
-            'flash'  => session('success'),
+            'flash'  => [
+                'success' => session('success'),
+                'error'   => session('error'),
+            ],
         ]);
     }
 
@@ -25,17 +29,16 @@ class TurmaController extends Controller
 
     public function store(Request $request)
     {
-        // Validação dos campos novos
         $data = $request->validate([
-            'nome'           => 'required|string|max:255',
-            'data_entrada'   => 'required|date',
+            'nome'              => 'required|string|max:255',
+            'data_entrada'      => 'required|date',
             'quantidade_alunos' => 'required|integer|min:0',
         ]);
 
-        // Criação da turma com os novos campos
         Turma::create($data);
 
-        return redirect()->route('turmas.index')->with('success', 'Turma criada com sucesso.');
+        return redirect()->route('turmas.index')
+            ->with('success', 'Turma criada com sucesso.');
     }
 
     public function edit(Turma $turma)
@@ -45,24 +48,33 @@ class TurmaController extends Controller
 
     public function update(Request $request, Turma $turma)
     {
-        // Validação dos campos novos
         $data = $request->validate([
-            'nome'           => 'required|string|max:255',
-            'data_entrada'   => 'required|date',
+            'nome'              => 'required|string|max:255',
+            'data_entrada'      => 'required|date',
             'quantidade_alunos' => 'required|integer|min:0',
         ]);
 
-        // Atualização dos dados da turma
         $turma->update($data);
 
-        return redirect()->route('turmas.index')->with('success', 'Turma atualizada com sucesso.');
+        return redirect()->route('turmas.index')
+            ->with('success', 'Turma atualizada com sucesso.');
     }
 
     public function destroy(Turma $turma)
     {
-        // Exclusão da turma
+        // Caminho 1: bloqueia a exclusão se a turma estiver em uso em algum ensalamento
+        $emUso = Ensalamento::where('turma_id', $turma->id)->count();
+
+        if ($emUso > 0) {
+            return back()->with(
+                'error',
+                "Não é possível excluir a turma \"{$turma->nome}\": ela está alocada em {$emUso} ensalamento(s). Remova as alocações antes de excluir."
+            );
+        }
+
         $turma->delete();
 
-        return redirect()->route('turmas.index')->with('success', 'Turma excluída.');
+        return redirect()->route('turmas.index')
+            ->with('success', 'Turma excluída com sucesso!');
     }
 }

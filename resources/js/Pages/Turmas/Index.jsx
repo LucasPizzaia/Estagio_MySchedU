@@ -1,8 +1,23 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function Index({ turmas = [], flash }) {
+  const page = usePage();
+  const flashProp = flash ?? page.props.flash ?? {};
+  const successMsg =
+    typeof flashProp === 'string' ? flashProp : flashProp.success;
+  const errorMsg =
+    typeof flashProp === 'string' ? null : flashProp.error;
+
+  const [showSuccess, setShowSuccess] = useState(!!successMsg);
+  const [showError, setShowError] = useState(!!errorMsg);
+
+  useEffect(() => {
+    setShowSuccess(!!successMsg);
+    setShowError(!!errorMsg);
+  }, [successMsg, errorMsg]);
+
   const [q, setQ] = useState('');
 
   const list = useMemo(() => {
@@ -20,7 +35,7 @@ export default function Index({ turmas = [], flash }) {
 
   const del = (id) => {
     if (confirm('Deseja realmente excluir esta turma?')) {
-      router.delete(`/turmas/${id}`);
+      router.delete(`/turmas/${id}`, { preserveScroll: true });
     }
   };
 
@@ -54,10 +69,41 @@ export default function Index({ turmas = [], flash }) {
         </div>
       </div>
 
-      {/* FLASH MESSAGE */}
-      {flash && (
-        <div className="max-w-6xl mx-auto mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-amber-800 shadow-sm font-medium">
-          {flash}
+      {/* FLASH MESSAGE - ERRO (ex.: turma em uso) */}
+      {showError && (
+        <div className="max-w-6xl mx-auto mb-4 flex items-start justify-between rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-red-800 shadow-sm font-medium">
+          <div className="flex items-start gap-2">
+            <svg className="w-5 h-5 mt-0.5 flex-shrink-0 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>{errorMsg}</span>
+          </div>
+          <button
+            onClick={() => setShowError(false)}
+            className="ml-4 text-red-700 hover:text-red-900 text-xl leading-none"
+            aria-label="Fechar"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {/* FLASH MESSAGE - SUCESSO */}
+      {showSuccess && (
+        <div className="max-w-6xl mx-auto mb-4 flex items-start justify-between rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-green-800 shadow-sm font-medium">
+          <div className="flex items-start gap-2">
+            <svg className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>{successMsg}</span>
+          </div>
+          <button
+            onClick={() => setShowSuccess(false)}
+            className="ml-4 text-green-700 hover:text-green-900 text-xl leading-none"
+            aria-label="Fechar"
+          >
+            ×
+          </button>
         </div>
       )}
 
@@ -75,7 +121,7 @@ export default function Index({ turmas = [], flash }) {
             </thead>
 
             <tbody className="divide-y divide-amber-50">
-              {list.map((t, i) => (
+              {list.map((t) => (
                 <tr key={t.id} className="hover:bg-amber-50/50 transition-colors group">
                   {/* Nome + Avatar */}
                   <td className="px-6 py-4">
@@ -105,7 +151,7 @@ export default function Index({ turmas = [], flash }) {
                   {/* AÇÕES (ÍCONES) */}
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
-                      
+
                       {/* Editar */}
                       <Link
                         href={`/turmas/${t.id}/edit`}

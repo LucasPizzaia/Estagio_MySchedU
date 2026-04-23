@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Professor;
 use App\Models\UnidadeCurricular;
+use App\Models\Ensalamento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Inertia\Inertia;
@@ -16,7 +17,10 @@ class ProfessorController extends Controller
 
         return Inertia::render('Professores/Index', [
             'professores' => $professores,
-            'flash'       => session('success'),
+            'flash'       => [
+                'success' => session('success'),
+                'error'   => session('error'),
+            ],
         ]);
     }
 
@@ -114,10 +118,24 @@ class ProfessorController extends Controller
 
     public function destroy(Professor $professor)
     {
+        // Caminho 1: bloqueia a exclusão se o professor estiver em uso em algum ensalamento
+        $emUso = Ensalamento::where('professor_id', $professor->id)->count();
+
+        if ($emUso > 0) {
+            return back()->with(
+                'error',
+                "Não é possível excluir o professor \"{$professor->nome} {$professor->sobrenome}\": ele está alocado em {$emUso} ensalamento(s). Remova as alocações antes de excluir."
+            );
+        }
+
+        // Remove vínculos de competência (UCs) da pivot antes do delete,
+        // para não estourar FK em professor_unidade_curricular.
+        $professor->unidadesCurriculares()->detach();
+
         $professor->delete();
 
         return redirect()->route('professores.index')
-            ->with('success', 'Professor excluído com sucesso.');
+            ->with('success', 'Professor excluído com sucesso!');
     }
 
     /**

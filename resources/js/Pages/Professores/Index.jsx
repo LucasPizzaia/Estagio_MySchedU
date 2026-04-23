@@ -1,8 +1,23 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function Index({ professores = [], flash }) {
+  const page = usePage();
+  const flashProp = flash ?? page.props.flash ?? {};
+  const successMsg =
+    typeof flashProp === 'string' ? flashProp : flashProp.success;
+  const errorMsg =
+    typeof flashProp === 'string' ? null : flashProp.error;
+
+  const [showSuccess, setShowSuccess] = useState(!!successMsg);
+  const [showError, setShowError] = useState(!!errorMsg);
+
+  useEffect(() => {
+    setShowSuccess(!!successMsg);
+    setShowError(!!errorMsg);
+  }, [successMsg, errorMsg]);
+
   const [q, setQ] = useState('');
   const [order, setOrder] = useState('matricula');
 
@@ -25,7 +40,7 @@ export default function Index({ professores = [], flash }) {
 
   const del = (id) => {
     if (confirm('Deseja realmente excluir este professor?')) {
-      router.delete(`/professores/${id}`);
+      router.delete(`/professores/${id}`, { preserveScroll: true });
     }
   };
 
@@ -42,7 +57,7 @@ export default function Index({ professores = [], flash }) {
 
         {/* BARRA DE FILTROS PREMIUM */}
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-          
+
           {/* BUSCA COM ÍCONE */}
           <div className="relative w-full sm:w-80 group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -62,7 +77,7 @@ export default function Index({ professores = [], flash }) {
           {/* ORDENAÇÃO ESTILIZADA */}
           <div className="relative w-full sm:w-48">
             <select
-              className="appearance-none block w-full pl-4 pr-10 py-3 bg-white border border-amber-100 rounded-2xl text-sm font-bold text-gray-700 shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all outline-none cursor-pointer"
+              className="appearance-none bg-none block w-full pl-4 pr-10 py-3 bg-white border border-amber-100 rounded-2xl text-sm font-bold text-gray-700 shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all outline-none cursor-pointer"
               value={order}
               onChange={(e) => setOrder(e.target.value)}
             >
@@ -79,10 +94,41 @@ export default function Index({ professores = [], flash }) {
         </div>
       </div>
 
-      {/* FLASH MESSAGE */}
-      {flash && (
-        <div className="max-w-6xl mx-auto mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-amber-800 shadow-sm font-medium">
-          {flash}
+      {/* FLASH MESSAGE - ERRO (ex.: professor em uso) */}
+      {showError && (
+        <div className="max-w-6xl mx-auto mb-4 flex items-start justify-between rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-red-800 shadow-sm font-medium">
+          <div className="flex items-start gap-2">
+            <svg className="w-5 h-5 mt-0.5 flex-shrink-0 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>{errorMsg}</span>
+          </div>
+          <button
+            onClick={() => setShowError(false)}
+            className="ml-4 text-red-700 hover:text-red-900 text-xl leading-none"
+            aria-label="Fechar"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {/* FLASH MESSAGE - SUCESSO */}
+      {showSuccess && (
+        <div className="max-w-6xl mx-auto mb-4 flex items-start justify-between rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-green-800 shadow-sm font-medium">
+          <div className="flex items-start gap-2">
+            <svg className="w-5 h-5 mt-0.5 flex-shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>{successMsg}</span>
+          </div>
+          <button
+            onClick={() => setShowSuccess(false)}
+            className="ml-4 text-green-700 hover:text-green-900 text-xl leading-none"
+            aria-label="Fechar"
+          >
+            ×
+          </button>
         </div>
       )}
 
@@ -100,7 +146,7 @@ export default function Index({ professores = [], flash }) {
             </thead>
 
             <tbody className="divide-y divide-amber-50">
-              {list.map((p, i) => (
+              {list.map((p) => (
                 <tr key={p.id} className="hover:bg-amber-50/50 transition-colors group">
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center rounded-lg bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800 border border-amber-200">
