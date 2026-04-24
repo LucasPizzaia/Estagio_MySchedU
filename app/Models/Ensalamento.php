@@ -16,4 +16,4 @@ protected $fillable = [
 public function professor() { return $this->belongsTo(Professor::class); }
 public function sala() { return $this->belongsTo(Sala::class); }
 public function turma() { return $this->belongsTo(Turma::class); }
-public function unidadeCurricular() { return $this->belongsTo(UnidadeCurricular::class); }}
+public function unidadeCurricular() { return $this->belongsTo(UnidadeCurricular::class);}}
